@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "529884108799",
+    "project_id": "finanzplaner-app-goerkem123",
+    "storage_bucket": "finanzplaner-app-goerkem123.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529884108799:android:609c678bf2c3c99fa479ca",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPFW2a2CzoOmkAoInxk7nAAcG55qSPbAY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

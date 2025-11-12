@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -17,6 +18,7 @@ public class LoginActivity extends AppCompatActivity {
     // View-Referenzen
     private EditText etemail, etpassword;
     private Button btnlogin, btnGoToRegister;
+    private TextView tvLoginResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         etpassword = findViewById(R.id.password);
         btnlogin = findViewById(R.id.login);
         btnGoToRegister = findViewById(R.id.GoToRegister);
+        tvLoginResult = findViewById(R.id.tvLoginResult);
 
 // 2) Login-Klick
         btnlogin.setOnClickListener(v -> {
@@ -48,9 +51,11 @@ public class LoginActivity extends AppCompatActivity {
                 etpassword.setError("Bitte Passwort eingeben");
                 return;
             }
+            // Nachricht auf dem Bildschirm anzeigen
+            String message = "Hallo " + email + "\nErfolgreich angemeldet!";
+            tvLoginResult.setText(message);
 
-            // TODO: später echte Prüfung (DB/Firebase)
-            Toast.makeText(this, "Login gedrückt: " + email, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Login erfolgreich!", Toast.LENGTH_SHORT).show();
         });
 
         // 3) Zur Registrierung navigieren

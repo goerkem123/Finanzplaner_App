@@ -1,9 +1,11 @@
 package com.example.finanzplaner;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +42,55 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister       = findViewById(R.id.button);        // "Registrieren"
         btnBackToLogin    = findViewById(R.id.BackToLogin);   // "Zurück zum Login"
         tvRegisterResult  = findViewById(R.id.tvRegisterResult);
+
+        btnRegister.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
+            String pw = etPassword.getText().toString();
+            String pwConfirm = etPasswordConfirm.getText().toString();
+
+            // Validierung (einfache Prüfungen)
+            if (username.isEmpty()) {
+                etUsername.setError("Bitte Benutzername eingeben");
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                etEmail.setError("Bitte gültige E-Mail eingeben");
+                return;
+            }
+
+            if (pw.length() < 8) {
+                etPassword.setError("Passwort muss mind. 8 Zeichen haben");
+                return;
+            }
+
+            if (!pw.equals(pwConfirm)) {
+                etPasswordConfirm.setError("Passwörter stimmen nicht überein");
+                return;
+            }
+
+            // Erfolgsmeldung
+            String message = "Registrierung erfolgreich!\nWillkommen, " + username + " 👋";
+            tvRegisterResult.setText(message);
+            Toast.makeText(this, "Erfolgreich registriert", Toast.LENGTH_SHORT).show();
+
+            // Eingabefelder leeren
+            etUsername.setText("");
+            etEmail.setText("");
+            etPassword.setText("");
+            etPasswordConfirm.setText("");
+        });
+
+        // 3️⃣ Klick auf „Zurück zum Login“
+        btnBackToLogin.setOnClickListener(v -> {
+            // Starte die LoginActivity
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+
+            // Beende die aktuelle Activity, damit man nicht doppelt zurück kann
+            finish();
+        });
 
     }
 }

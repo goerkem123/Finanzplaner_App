@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 
@@ -35,7 +36,6 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-
 
 
         // (optional) nur, wenn du so ein Title-Element hast:
@@ -86,15 +86,29 @@ public class RegisterActivity extends AppCompatActivity {
             // Firebase Registrierung
             mAuth.createUserWithEmailAndPassword(email, pw)
                     .addOnCompleteListener(task -> {
+
                         if (task.isSuccessful()) {
 
-                            tvRegisterResult.setText("Registrierung erfolgreich!");
+                            FirebaseUser user = mAuth.getCurrentUser();
 
-                            Toast.makeText(this, "Account wurde erstellt!", Toast.LENGTH_SHORT).show();
+                            if (user != null) {
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(verifyTask -> {
+                                            if (verifyTask.isSuccessful()) {
 
-                            // zurück zum Login
-                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                            finish();
+                                                tvRegisterResult.setText("Bestätigungs-E-Mail wurde gesendet!");
+                                                Toast.makeText(this,
+                                                        "Bitte bestätige deine E-Mail, bevor du dich anmeldest.",
+                                                        Toast.LENGTH_LONG).show();
+
+                                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                                finish();
+
+                                            } else {
+                                                tvRegisterResult.setText("E-Mail konnte nicht gesendet werden.");
+                                            }
+                                        });
+                            }
 
                         } else {
                             tvRegisterResult.setText("Registrierung fehlgeschlagen");
@@ -103,7 +117,6 @@ public class RegisterActivity extends AppCompatActivity {
                     });
         });
 
-        //automatische Weiterleitung zum Login nach erflogreicher Restigrierung
         btnBackToLogin.setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
             finish();

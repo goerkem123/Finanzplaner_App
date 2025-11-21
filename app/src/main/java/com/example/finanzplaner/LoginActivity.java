@@ -64,13 +64,29 @@ public class LoginActivity extends AppCompatActivity {
             tvLoginResult.setText("Bitte warten...");
             mAuth.signInWithEmailAndPassword(email, pw)
                     .addOnCompleteListener(this, (Task<AuthResult> task) -> {
+
                         if (task.isSuccessful()) {
+
+                            com.google.firebase.auth.FirebaseUser user = mAuth.getCurrentUser();
+
+                            // Prüfen, ob die E-Mail bereits bestätigt wurde
+                            if (user != null && !user.isEmailVerified()) {
+                                tvLoginResult.setText("Bitte bestätige zuerst deine E-Mail.");
+                                Toast.makeText(this,
+                                        "E-Mail wurde noch nicht bestätigt!",
+                                        Toast.LENGTH_LONG).show();
+                                mAuth.signOut();
+                                return; // ganz wichtig: Abbrechen!
+                            }
+
+                            // Wenn E-Mail bestätigt ist:
                             tvLoginResult.setText("Login erfolgreich");
                             Toast.makeText(LoginActivity.this, "Willkommen!", Toast.LENGTH_SHORT).show();
-
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
-                        } else {
+                        }
+
+                        else {
                             tvLoginResult.setText("Anmeldung fehlgeschlagen");
                             Toast.makeText(LoginActivity.this, "E-Mail oder Passwort falsch", Toast.LENGTH_LONG).show();
                         }

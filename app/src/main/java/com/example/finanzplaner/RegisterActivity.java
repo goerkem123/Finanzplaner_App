@@ -13,11 +13,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+
+
+
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText etUsername, etEmail, etPassword, etPasswordConfirm;
     private Button btnRegister, btnBackToLogin;
     private TextView tvRegisterResult;
+
+    private FirebaseAuth mAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +33,10 @@ public class RegisterActivity extends AppCompatActivity {
 
         // 👉 Hier sagst du Android, welches Layout angezeigt werden soll:
         setContentView(R.layout.activity_register);
+
+        mAuth = FirebaseAuth.getInstance();
+
+
 
         // (optional) nur, wenn du so ein Title-Element hast:
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.RegisterTitle), (v, insets) -> {
@@ -70,27 +81,34 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Erfolgsmeldung
-            String message = "Registrierung erfolgreich!\nWillkommen, " + username + " 👋";
-            tvRegisterResult.setText(message);
-            Toast.makeText(this, "Erfolgreich registriert", Toast.LENGTH_SHORT).show();
+            tvRegisterResult.setText("Bitte warten...");
 
-            // Eingabefelder leeren
-            etUsername.setText("");
-            etEmail.setText("");
-            etPassword.setText("");
-            etPasswordConfirm.setText("");
+            // Firebase Registrierung
+            mAuth.createUserWithEmailAndPassword(email, pw)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+
+                            tvRegisterResult.setText("Registrierung erfolgreich!");
+
+                            Toast.makeText(this, "Account wurde erstellt!", Toast.LENGTH_SHORT).show();
+
+                            // zurück zum Login
+                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                            finish();
+
+                        } else {
+                            tvRegisterResult.setText("Registrierung fehlgeschlagen");
+                            Toast.makeText(this, "E-Mail existiert bereits?", Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
-        // 3️⃣ Klick auf „Zurück zum Login“
+        //automatische Weiterleitung zum Login nach erflogreicher Restigrierung
         btnBackToLogin.setOnClickListener(v -> {
-            // Starte die LoginActivity
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(intent);
-
-            // Beende die aktuelle Activity, damit man nicht doppelt zurück kann
+            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
             finish();
         });
-
     }
 }
+
+

@@ -27,13 +27,15 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="#211D1D">
 
             <TextView
                 android:id="@+id/tv_overview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Übersicht"
+                android:textColor="#FAF8F8"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -42,6 +44,95 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.059" />
+
+            <TextView
+                android:id="@+id/tv_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50,00€"
+                android:textColor="#4CAF50"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.153" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_einnahmen"
+                android:layout_width="146dp"
+                android:layout_height="65dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#4CAF50"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/cv_ausgaben"
+                app:layout_constraintHorizontal_bias="0.516"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_balance"
+                app:layout_constraintVertical_bias="0.033">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#CB4CAF50"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_card_title1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Einnahmen"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/tv_card_amount1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="100,00€"
+                        android:textSize="18sp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_ausgaben"
+                android:layout_width="160dp"
+                android:layout_height="63dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.936"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_balance"
+                app:layout_constraintVertical_bias="0.031">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#D9E91E1E"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_card_title2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ausgaben"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/tv_card_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="50,00€"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 

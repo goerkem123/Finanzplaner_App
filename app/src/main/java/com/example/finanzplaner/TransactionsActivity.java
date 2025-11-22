@@ -27,19 +27,20 @@ public class TransactionsActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                Intent intent = new Intent(TransactionsActivity.this, HomeActivity.class);
+                Intent intent = new Intent(this, HomeActivity.class);
                 startActivity(intent);
-                // Optional: aktuelle Transaktionen-Aktivität schließen
                 finish();
                 return true;
             } else if (id == R.id.nav_transactions) {
-                // sind schon hier, nichts tun
+                // sind schon hier
                 return true;
             } else if (id == R.id.nav_diagramme) {
-                // später: DiagrammeActivity starten
+                startActivity(new Intent(this, DiagrammeActivity.class));
+                finish();
                 return true;
             } else if (id == R.id.nav_reports) {
-                // später: ReportsActivity starten
+                startActivity(new Intent(this, ReportsActivity.class));
+                finish();
                 return true;
             }
             return false;

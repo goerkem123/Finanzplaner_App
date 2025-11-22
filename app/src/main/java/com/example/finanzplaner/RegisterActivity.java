@@ -13,11 +13,24 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
+import java.util.HashMap;
+
+
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText etUsername, etEmail, etPassword, etPasswordConfirm;
     private Button btnRegister, btnBackToLogin;
     private TextView tvRegisterResult;
+
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +39,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         // 👉 Hier sagst du Android, welches Layout angezeigt werden soll:
         setContentView(R.layout.activity_register);
+
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+
 
         // (optional) nur, wenn du so ein Title-Element hast:
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.RegisterTitle), (v, insets) -> {
@@ -70,27 +88,64 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Erfolgsmeldung
-            String message = "Registrierung erfolgreich!\nWillkommen, " + username + " 👋";
-            tvRegisterResult.setText(message);
-            Toast.makeText(this, "Erfolgreich registriert", Toast.LENGTH_SHORT).show();
+            tvRegisterResult.setText("Bitte warten...");
 
-            // Eingabefelder leeren
-            etUsername.setText("");
-            etEmail.setText("");
-            etPassword.setText("");
-            etPasswordConfirm.setText("");
+            // Firebase Registrierung
+            mAuth.createUserWithEmailAndPassword(email, pw)
+                    .addOnCompleteListener(task -> {
+
+                        if (task.isSuccessful()) {
+
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            if (user != null) {
+
+                                // 🔥 User-Daten in Firestore speichern
+                                Map<String, Object> userData = new HashMap<>();
+                                userData.put("username", username);
+                                userData.put("email", email);
+                                userData.put("createdAt", System.currentTimeMillis());
+
+                                db.collection("users")
+                                        .document(user.getUid())
+                                        .set(userData)
+                                        .addOnSuccessListener(unused -> {
+                                            // optional
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(this, "Fehler beim Speichern in Firestore", Toast.LENGTH_SHORT).show();
+                                        });
+
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(verifyTask -> {
+                                            if (verifyTask.isSuccessful()) {
+
+                                                tvRegisterResult.setText("Bestätigungs-E-Mail wurde gesendet!");
+                                                Toast.makeText(this,
+                                                        "Bitte bestätige deine E-Mail, bevor du dich anmeldest.",
+                                                        Toast.LENGTH_LONG).show();
+
+                                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                                finish();
+
+                                            } else {
+                                                tvRegisterResult.setText("E-Mail konnte nicht gesendet werden.");
+                                            }
+                                        });
+                            }
+
+                        } else {
+                            tvRegisterResult.setText("Registrierung fehlgeschlagen");
+                            Toast.makeText(this, "E-Mail existiert bereits?", Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
-        // 3️⃣ Klick auf „Zurück zum Login“
         btnBackToLogin.setOnClickListener(v -> {
-            // Starte die LoginActivity
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(intent);
-
-            // Beende die aktuelle Activity, damit man nicht doppelt zurück kann
+            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
             finish();
         });
-
     }
 }
+
+

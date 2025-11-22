@@ -7,10 +7,12 @@ import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class HomeActivity extends AppCompatActivity {
 
     private ImageButton btnLogout;
+    private FloatingActionButton fabAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,13 @@ public class HomeActivity extends AppCompatActivity {
 
             startActivity(i);
             finish(); // HomeActivity schließen
+        });
+
+        fabAdd = findViewById(R.id.fab_add_transaction);
+
+        fabAdd.setOnClickListener(v -> {
+            Intent i = new Intent(this, AddTransactionActivity.class);
+            startActivity(i);
         });
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);

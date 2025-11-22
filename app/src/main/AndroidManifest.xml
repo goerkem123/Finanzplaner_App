@@ -11,15 +11,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
+
         <activity
-            android:name="com.example.finanzplaner.LoginActivity"
+            android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.finanzplaner.RegisterActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".TransactionsActivity" />
+        <activity android:name=".DiagrammeActivity" />
+        <activity android:name=".ReportsActivity" />
+        <activity android:name=".AddTransactionActivity" />
     </application>
 
 </manifest>

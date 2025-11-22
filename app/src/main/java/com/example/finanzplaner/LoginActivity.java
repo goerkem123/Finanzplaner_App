@@ -82,7 +82,7 @@ public class LoginActivity extends AppCompatActivity {
                             // Wenn E-Mail bestätigt ist:
                             tvLoginResult.setText("Login erfolgreich");
                             Toast.makeText(LoginActivity.this, "Willkommen!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                             finish();
                         }
 

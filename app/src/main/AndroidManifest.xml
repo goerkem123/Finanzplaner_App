@@ -12,9 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
-            android:name=".TransactionsActivity"
-            android:exported="false" />
-        <activity
             android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
@@ -25,6 +22,7 @@
         </activity>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
+        <activity android:name=".TransactionsActivity" />
     </application>
 
 </manifest>

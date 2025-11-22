@@ -97,7 +97,7 @@
     <Spinner
         android:id="@+id/spinner_category"
         android:layout_width="355dp"
-        android:layout_height="41dp"
+        android:layout_height="56dp"
         android:layout_marginStart="26dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="26dp"
@@ -110,8 +110,8 @@
 
     <TextView
         android:id="@+id/tv_pick_date"
-        android:layout_width="347dp"
-        android:layout_height="35dp"
+        android:layout_width="353dp"
+        android:layout_height="45dp"
         android:layout_marginStart="26dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="26dp"
@@ -126,5 +126,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinner_category"
         app:layout_constraintVertical_bias="0.0" />
+
+    <Switch
+        android:id="@+id/switch_recurring"
+        android:layout_width="355dp"
+        android:layout_height="53dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="26dp"
+        android:text="Wiederkehrende Buchung"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_pick_date"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_save_transaction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:contentDescription="Hinzufügen"
+        app:backgroundTint="#5AA45E"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_recurring"
+        app:layout_constraintVertical_bias="0.503"
+        app:layout_marginBaseline="32dp"
+        app:srcCompat="?android:attr/textCheckMark" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

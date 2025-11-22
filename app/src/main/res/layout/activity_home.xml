@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="24dp"
-    android:background="#595757">
+    android:layout_marginTop="30dp"
+    android:background="#595757"
+    android:contentDescription="Logout">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
@@ -222,7 +223,7 @@
             android:id="@+id/ll_limits"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_limits_1"
@@ -291,4 +292,18 @@
             </androidx.cardview.widget.CardView>
         </LinearLayout>
     </ScrollView>
+
+    <ImageButton
+        android:id="@+id/btn_logout"
+        android:layout_width="53dp"
+        android:layout_height="49dp"
+        android:layout_marginTop="24dp"
+        android:contentDescription="Logout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.926"
+        app:layout_constraintStart_toEndOf="@+id/tv_overview_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_logout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

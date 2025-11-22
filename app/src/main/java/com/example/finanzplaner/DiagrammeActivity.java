@@ -39,7 +39,8 @@ public class DiagrammeActivity extends AppCompatActivity {
                 // sind schon hier
                 return true;
             } else if (id == R.id.nav_reports) {
-                // später hinzufügen
+                startActivity(new Intent(this, ReportsActivity.class));
+                finish();
                 return true;
             }
             return false;

@@ -35,7 +35,7 @@ public class ReportsActivity extends AppCompatActivity {
                 finish();
                 return true;
             } else if (id == R.id.nav_reports) {
-                // schon hier
+                // sind schon hier
                 return true;
             }
             return false;

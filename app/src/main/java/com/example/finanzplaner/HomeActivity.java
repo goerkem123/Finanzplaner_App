@@ -23,20 +23,19 @@ public class HomeActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                // Wir sind schon auf Home, nichts machen
+                // sind schon hier
                 return true;
             } else if (id == R.id.nav_transactions) {
-                // Zu Transaktionen wechseln
-                Intent intent = new Intent(HomeActivity.this, TransactionsActivity.class);
+                Intent intent = new Intent(this, TransactionsActivity.class);
                 startActivity(intent);
-                // Optional: HomeActivity schließen, damit "Zurück" nicht zurück auf Home führt
-                // finish();
                 return true;
             } else if (id == R.id.nav_diagramme) {
-                // später: DiagrammeActivity starten
+                startActivity(new Intent(this, DiagrammeActivity.class));
+                finish();
                 return true;
             } else if (id == R.id.nav_reports) {
-                // später: ReportsActivity starten
+                startActivity(new Intent(this, ReportsActivity.class));
+                finish();
                 return true;
             }
             return false;

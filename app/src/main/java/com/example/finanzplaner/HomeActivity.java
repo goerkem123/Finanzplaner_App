@@ -2,17 +2,30 @@ package com.example.finanzplaner;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private ImageButton btnLogout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // hier verknüpfst du die Activity mit deinem Home-Layout:
         setContentView(R.layout.activity_home);
+
+        btnLogout = findViewById(R.id.btn_logout);
+
+        btnLogout.setOnClickListener(v -> {
+            Intent i = new Intent(HomeActivity.this, LoginActivity.class);
+
+            startActivity(i);
+            finish(); // HomeActivity schließen
+        });
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
 

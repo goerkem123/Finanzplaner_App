@@ -56,6 +56,12 @@ public class LoginActivity extends AppCompatActivity {
             tvLoginResult.setText(message);
 
             Toast.makeText(this, "Login erfolgreich!", Toast.LENGTH_SHORT).show();
+
+            // Zum Home-Bildschirm wechseln
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+
+            finish();
         });
 
         // 3) Zur Registrierung navigieren

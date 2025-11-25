@@ -116,66 +116,12 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     // Füllt den Kategorie-Spinner mit einer Liste
     private void setupCategorySpinner() {
-        // 1) Leere Liste anlegen
-        categoryList = new ArrayList<>();
+        // Vorläufige Liste (später können wir die aus der DB laden)
+        String[] categories = {"Lebensmittel", "Miete", "Gehalt", "Freizeit", "Transport", "Sonstiges"};
 
-        // 2) Adapter erstellen und mit Spinner verbinden
-        categoryAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                categoryList
-        );
-        spinnerCategory.setAdapter(categoryAdapter);
-
-        // 3) Kategorien aus Firestore laden
-        db.collection("categories")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-
-                            // Wenn nichts gefunden wurde → einfache Standardwerte einfügen
-                            if (queryDocumentSnapshots.isEmpty()) {
-                                categoryList.add("Lebensmittel");
-                                categoryList.add("Miete");
-                                categoryList.add("Gehalt");
-                                categoryList.add("Freizeit");
-                                categoryList.add("Transport");
-                                categoryList.add("Sonstiges");
-                            } else {
-                                // Alle Dokumente durchgehen
-                                for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                                    String name = doc.getString("name");
-                                    if (name != null && !name.trim().isEmpty()) {
-                                        categoryList.add(name);
-                                    }
-                                }
-
-                                // Falls jemand Blödsinn in Firestore eingetragen hat
-                                if (categoryList.isEmpty()) {
-                                    categoryList.add("Lebensmittel");
-                                    categoryList.add("Miete");
-                                    categoryList.add("Gehalt");
-                                    categoryList.add("Freizeit");
-                                    categoryList.add("Transport");
-                                    categoryList.add("Sonstiges");
-                                }
-                            }// 4) Dem Adapter sagen, dass sich die Daten geändert haben
-                    categoryAdapter.notifyDataSetChanged();
-                }).addOnFailureListener(e -> {
-                    // Bei Fehler: Fallback-Liste benutzen
-                    Toast.makeText(this,
-                            "Kategorien konnten nicht geladen werden – Standardwerte verwendet.",
-                            Toast.LENGTH_LONG).show();
-
-                    categoryList.clear();
-                    categoryList.add("Lebensmittel");
-                    categoryList.add("Miete");
-                    categoryList.add("Gehalt");
-                    categoryList.add("Freizeit");
-                    categoryList.add("Transport");
-                    categoryList.add("Sonstiges");
-                    categoryAdapter.notifyDataSetChanged();
-                });
-
+        // Ein Adapter verbindet die Liste mit dem Spinner-Design
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
+        spinnerCategory.setAdapter(adapter);
     }
 
     // Die Logik für den Datums-Wähler

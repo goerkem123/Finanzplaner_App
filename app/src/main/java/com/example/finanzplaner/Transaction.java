@@ -11,15 +11,15 @@ public class Transaction {
     private double amount;      // Der Betrag (z.B. 12.50)
     private String type;        // "einnahme" oder "ausgabe"
     private String category;    // z.B. "Lebensmittel", "Miete"
-    private long timestamp;     // Zeitpunkt der Erstellung (in Millisekunden)
-    private boolean isRecurring; // NEU: Ist es eine wiederkehrende Buchung?
+    private long timestamp;     // 🔥 WIEDER DA: Zeitpunkt der Erstellung (in Millisekunden)
+    private boolean isRecurring; // Ist es eine wiederkehrende Buchung?
 
     // 1. WICHTIG: Leerer Konstruktor (wird von Firestore benötigt!)
     public Transaction() {
         // Muss leer bleiben
     }
 
-    // 2. Voller Konstruktor
+    // 2. Voller Konstruktor (aktualisiert mit timestamp UND isRecurring)
     public Transaction(String userId, String title, double amount, String type, String category, long timestamp, boolean isRecurring) {
         // ID wird erst später gesetzt, wenn wir speichern
         this.userId = userId;
@@ -27,11 +27,12 @@ public class Transaction {
         this.amount = amount;
         this.type = type;
         this.category = category;
-        this.timestamp = timestamp;
+        this.timestamp = timestamp; // 🔥 WIEDER DA
+
         this.isRecurring = isRecurring;
     }
 
-    // 3. Getter und Setter
+    // 3. Getter und Setter (damit Firestore auf die privaten Variablen zugreifen kann)
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -51,10 +52,10 @@ public class Transaction {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
+    // 🔥 WIEDER DA: Getter/Setter für das Datum
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-    // Getter/Setter für recurring
     public boolean isRecurring() { return isRecurring; }
     public void setRecurring(boolean recurring) { isRecurring = recurring; }
 }

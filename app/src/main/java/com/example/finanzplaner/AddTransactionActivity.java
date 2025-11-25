@@ -127,6 +127,41 @@ public class AddTransactionActivity extends AppCompatActivity {
         );
         spinnerCategory.setAdapter(categoryAdapter);
 
+        // 3) Kategorien aus Firestore laden
+        db.collection("categories")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+
+                            // Wenn nichts gefunden wurde → einfache Standardwerte einfügen
+                            if (queryDocumentSnapshots.isEmpty()) {
+                                categoryList.add("Lebensmittel");
+                                categoryList.add("Miete");
+                                categoryList.add("Gehalt");
+                                categoryList.add("Freizeit");
+                                categoryList.add("Transport");
+                                categoryList.add("Sonstiges");
+                            } else {
+                                // Alle Dokumente durchgehen
+                                for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                                    String name = doc.getString("name");
+                                    if (name != null && !name.trim().isEmpty()) {
+                                        categoryList.add(name);
+                                    }
+                                }
+
+                                // Falls jemand Blödsinn in Firestore eingetragen hat
+                                if (categoryList.isEmpty()) {
+                                    categoryList.add("Lebensmittel");
+                                    categoryList.add("Miete");
+                                    categoryList.add("Gehalt");
+                                    categoryList.add("Freizeit");
+                                    categoryList.add("Transport");
+                                    categoryList.add("Sonstiges");
+                                }
+                            }// 4) Dem Adapter sagen, dass sich die Daten geändert haben
+                    categoryAdapter.notifyDataSetChanged();
+                })
+
     }
 
     // Die Logik für den Datums-Wähler

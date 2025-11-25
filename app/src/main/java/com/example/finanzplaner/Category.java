@@ -15,5 +15,19 @@ public class Category {
         this.limit = limit;
         this.current = current;
     }
+    // Getter & Setter
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public double getLimit() { return limit; }
+    public void setLimit(double limit) { this.limit = limit; }
+
+    public double getCurrent() { return current; }
+    public void setCurrent(double current) { this.current = current; }
 }

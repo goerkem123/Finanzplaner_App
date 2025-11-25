@@ -6,6 +6,14 @@ public class Category {
     private double limit;       // Monatslimit (0 = kein Limit)
     private double current;     // Aktuell ausgegeben (zum Berechnen der Warnfarben)
 
-    // 🔥 WICHTIG: Leerer Konstruktor für Fir
+    public Category() {}
+
+    // Voller Konstruktor
+    public Category(String userId, String name, double limit, double current) {
+        this.userId = userId;
+        this.name = name;
+        this.limit = limit;
+        this.current = current;
+    }
 
 }

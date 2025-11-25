@@ -160,7 +160,21 @@ public class AddTransactionActivity extends AppCompatActivity {
                                 }
                             }// 4) Dem Adapter sagen, dass sich die Daten geändert haben
                     categoryAdapter.notifyDataSetChanged();
-                })
+                }).addOnFailureListener(e -> {
+                    // Bei Fehler: Fallback-Liste benutzen
+                    Toast.makeText(this,
+                            "Kategorien konnten nicht geladen werden – Standardwerte verwendet.",
+                            Toast.LENGTH_LONG).show();
+
+                    categoryList.clear();
+                    categoryList.add("Lebensmittel");
+                    categoryList.add("Miete");
+                    categoryList.add("Gehalt");
+                    categoryList.add("Freizeit");
+                    categoryList.add("Transport");
+                    categoryList.add("Sonstiges");
+                    categoryAdapter.notifyDataSetChanged();
+                });
 
     }
 

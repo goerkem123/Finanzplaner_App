@@ -110,14 +110,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     // Füllt den Kategorie-Spinner mit einer Liste
-    private void setupCategorySpinner() {
-        // Vorläufige Liste (später können wir die aus der DB laden)
-        String[] categories = {"Lebensmittel", "Miete", "Gehalt"};
 
-        // Ein Adapter verbindet die Liste mit dem Spinner-Design
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
-        spinnerCategory.setAdapter(adapter);
-    }
 
     // Die Logik für den Datums-Wähler
     private void setupDatePicker() {

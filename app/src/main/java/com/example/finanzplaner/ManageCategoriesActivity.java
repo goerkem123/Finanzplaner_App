@@ -63,6 +63,12 @@ public class ManageCategoriesActivity extends AppCompatActivity {
 
         // 6. Button Klick
         fabAdd.setOnClickListener(v -> showAddDialog());
+        // Klick auf ein Listen-Element -> Bearbeiten/Löschen Dialog öffnen
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            // passende Kategorie-Objekt aus der Liste öffnen
+            Category selectedCategory = categoryObjectList.get(position);
+            showEditDialog(selectedCategory);
+        });
     }
 
     // METHODE: DATEN AUS FIREBASE LADEN

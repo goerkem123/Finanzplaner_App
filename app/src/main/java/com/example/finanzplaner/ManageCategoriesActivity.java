@@ -187,5 +187,23 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         layout.addView(inputLimit);
 
         builder.setView(layout);
+
+        // SPEICHERN (Update) - Botton 1
+        builder.setPositiveButton("Speichern", (dialog, which) -> {
+            String limitStr = inputLimit.getText().toString().trim();
+            double newLimit = 0;
+            if (!limitStr.isEmpty()) {
+                try {
+                    newLimit = Double.parseDouble(limitStr);
+                } catch (NumberFormatException e) {
+                    return; // Wenn Quatsch eingegeben wurde, mach nichts
+                }
+            }
+
+            // In Firestore aktualisieren
+            db.collection("categories").document(category.getId())
+                    .update("limit", newLimit)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Limit aktualisiert", Toast.LENGTH_SHORT).show());
+        });
     }
 }

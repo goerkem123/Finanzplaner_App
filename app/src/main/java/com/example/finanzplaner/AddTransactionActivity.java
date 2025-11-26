@@ -17,16 +17,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.OnFailureListener;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class AddTransactionActivity extends AppCompatActivity {
 
@@ -37,8 +33,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private TextView tvPickDate;
     private Switch switchRecurring;
     private FloatingActionButton fabSave;
-    private ArrayAdapter<String> categoryAdapter;
-    private java.util.List<String> categoryList;
+    private List<String> categoryNameList;
 
     // --- 2. Firebase ---
     private FirebaseAuth mAuth;
@@ -117,7 +112,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     // Füllt den Kategorie-Spinner mit einer Liste
     private void setupCategorySpinner() {
         // Vorläufige Liste (später können wir die aus der DB laden)
-        String[] categories = {"Lebensmittel", "Miete", "Gehalt", "Freizeit", "Transport", "Sonstiges"};
+        String[] categories = {"Lebensmittel", "Miete", "Gehalt"};
 
         // Ein Adapter verbindet die Liste mit dem Spinner-Design
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);

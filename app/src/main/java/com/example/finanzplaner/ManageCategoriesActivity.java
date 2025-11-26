@@ -2,10 +2,12 @@ package com.example.finanzplaner;
 
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -61,7 +63,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             Toast.makeText(this, "Hinzufügen kommt im nächsten Schritt!", Toast.LENGTH_SHORT).show();
         });
     }
-    // --- METHODE: DATEN AUS FIREBASE LADEN ---
+    // METHODE: DATEN AUS FIREBASE LADEN
     private void loadCategories() {
         if (mAuth.getCurrentUser() == null) return;
         String userId = mAuth.getCurrentUser().getUid();
@@ -98,5 +100,15 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                     // Dem Adapter sagen: "Hey, Daten haben sich geändert, Liste neu malen!"
                     adapter.notifyDataSetChanged();
                 });
+        // Das Pop-up Fenster zum Hinzufügen
+        private void showAddDialog() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Neue Kategorie");
+
+            // Wir bauen ein Layout für das Fenster (zwei Eingabefelder untereinander)
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setPadding(50, 40, 50, 10); // Ein bisschen Abstand zum Rand
+        }
     }
 }

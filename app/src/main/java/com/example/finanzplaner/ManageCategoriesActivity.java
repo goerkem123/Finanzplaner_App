@@ -205,5 +205,12 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                     .update("limit", newLimit)
                     .addOnSuccessListener(aVoid -> Toast.makeText(this, "Limit aktualisiert", Toast.LENGTH_SHORT).show());
         });
+        // LÖSCHEN (Delete) -> Der "Neutrale" Knopf - Botton 2
+        builder.setNeutralButton("Löschen", (dialog, which) -> {
+            // Firestore Befehl zum Löschen
+            db.collection("categories").document(category.getId())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Kategorie gelöscht", Toast.LENGTH_SHORT).show());
+        });
     }
 }

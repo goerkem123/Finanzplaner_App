@@ -22,6 +22,7 @@ public class HomeActivity extends AppCompatActivity {
 
     // UI-Elemente
     private ImageButton btnLogout;
+    private ImageButton btnCategories;
     private FloatingActionButton fabAdd;
     // Die Textfelder für die Zahlen (IDs aus deiner activity_home.xml)
     private TextView tvBalance, tvIncome, tvExpense;
@@ -41,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // Views verbinden
         btnLogout = findViewById(R.id.btn_logout);
+        btnCategories = findViewById(R.id.btn_categories);
         fabAdd = findViewById(R.id.fab_add_transaction);
 
         // --- DIE IDS AUS DEM XML-LAYOUT DEINES PARTNERS ---
@@ -55,6 +57,11 @@ public class HomeActivity extends AppCompatActivity {
             Intent i = new Intent(HomeActivity.this, LoginActivity.class);
             startActivity(i);
             finish();
+        });
+        //Category-Button Logik
+        btnCategories.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, ManageCategoriesActivity.class);
+            startActivity(intent);
         });
 
         // Hinzufügen-Button Logik

@@ -212,5 +212,9 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                     .delete()
                     .addOnSuccessListener(aVoid -> Toast.makeText(this, "Kategorie gelöscht", Toast.LENGTH_SHORT).show());
         });
+        // ABBRECHEN - Botton 3
+        builder.setNegativeButton("Abbrechen", null);
+
+        builder.show();
     }
 }

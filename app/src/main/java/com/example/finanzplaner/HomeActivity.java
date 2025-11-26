@@ -22,6 +22,7 @@ public class HomeActivity extends AppCompatActivity {
 
     // UI-Elemente
     private ImageButton btnLogout;
+    private ImageButton btnCategories;
     private FloatingActionButton fabAdd;
     // Die Textfelder für die Zahlen (IDs aus deiner activity_home.xml)
     private TextView tvBalance, tvIncome, tvExpense;
@@ -41,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // Views verbinden
         btnLogout = findViewById(R.id.btn_logout);
+        btnCategories = findViewById(R.id.btn_categories);
         fabAdd = findViewById(R.id.fab_add_transaction);
 
         // --- DIE IDS AUS DEM XML-LAYOUT DEINES PARTNERS ---
@@ -55,6 +57,11 @@ public class HomeActivity extends AppCompatActivity {
             Intent i = new Intent(HomeActivity.this, LoginActivity.class);
             startActivity(i);
             finish();
+        });
+        //Category-Button Logik
+        btnCategories.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, ManageCategoriesActivity.class);
+            startActivity(intent);
         });
 
         // Hinzufügen-Button Logik
@@ -73,6 +80,35 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadFinancialData();
+    }
+    // Standard-Kategorien erstellen
+    private void checkAndCreateDefaultCategories() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        // Prüfen: Hat dieser User schon irgendwelche Kategorien?
+        db.collection("categories")
+                .whereEqualTo("userId", user.getUid())
+                .limit(1) // Es reicht zu wissen, ob EINE existiert
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        // Liste leer -> Neuer User (oder alle gelöscht). Wir legen Standards an.
+                        createCategory(user.getUid(), "Lebensmittel", 0);
+                        createCategory(user.getUid(), "Miete", 0);
+                        createCategory(user.getUid(), "Gehalt", 0);
+
+                        // Optional: Kleiner Hinweis
+                        // Toast.makeText(this, "Standard-Kategorien eingerichtet.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    // Hilfsmethode zum Speichern einer Kategorie
+    private void createCategory(String userId, String name, double limit) {
+        // Wir nutzen deinen Category-Konstruktor: (userId, name, limit, current)
+        Category cat = new Category(userId, name, limit, 0.0);
+
+        db.collection("categories").add(cat);
     }
 
     // --- Hauptlogik: Daten aus Firestore laden und berechnen ---
@@ -173,5 +209,6 @@ public class HomeActivity extends AppCompatActivity {
             }
             return false;
         });
+        checkAndCreateDefaultCategories();
     }
 }

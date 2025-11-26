@@ -17,9 +17,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class AddTransactionActivity extends AppCompatActivity {
@@ -31,6 +34,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private TextView tvPickDate;
     private Switch switchRecurring;
     private FloatingActionButton fabSave;
+    private List<String> categoryNameList;
 
     // --- 2. Firebase ---
     private FirebaseAuth mAuth;
@@ -58,9 +62,10 @@ public class AddTransactionActivity extends AppCompatActivity {
         // --- 4. Die Java-Variablen mit den IDs aus dem XML-Design verbinden ---
         initViews();
 
+        categoryNameList = new ArrayList<>();
         // --- 5. Die Logik für die Knöpfe einrichten ---
         setupTypeButtons();      // Einnahme/Ausgabe Klick-Logik
-        setupCategorySpinner();  // Kategorien in den Spinner laden
+        loadCategoriesFromFirestore();  // Kategorien in den Spinner laden
         setupDatePicker();       // Datumsauswahl-Dialog
         updateDateLabel();       // Das aktuelle Datum im Textfeld anzeigen
 
@@ -107,15 +112,33 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     // Füllt den Kategorie-Spinner mit einer Liste
-    private void setupCategorySpinner() {
-        // Vorläufige Liste (später können wir die aus der DB laden)
-        String[] categories = {"Lebensmittel", "Miete", "Gehalt", "Freizeit", "Transport", "Sonstiges"};
+    private void loadCategoriesFromFirestore() {
+        if (mAuth.getCurrentUser() == null) return;
 
-        // Ein Adapter verbindet die Liste mit dem Spinner-Design
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
-        spinnerCategory.setAdapter(adapter);
+        db.collection("categories")
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
+                //.orderBy("name") // Sortiert alphabetisch (A-Z)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    categoryNameList.clear(); // Liste leere
+// Alle gefundenen Kategorien in die Liste packen
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        Category cat = doc.toObject(Category.class);
+                        if (cat.getName() != null) {
+                            categoryNameList.add(cat.getName());
+                        }
+                    }
+                    // Fallback: Falls der Nutzer ALLES gelöscht hat
+                    if (categoryNameList.isEmpty()) categoryNameList.add("Allgemein");
+
+                    // Den Spinner mit den geladenen Daten füllen
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNameList);
+                    spinnerCategory.setAdapter(adapter);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Kategorien konnten nicht geladen werden.", Toast.LENGTH_SHORT).show()
+                );
     }
-
     // Die Logik für den Datums-Wähler
     private void setupDatePicker() {
         // Was passiert, wenn ein Datum ausgewählt wird?

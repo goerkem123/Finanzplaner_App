@@ -1,0 +1,226 @@
+package com.example.finanzplaner;
+
+import android.os.Bundle;
+import android.text.InputType;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ManageCategoriesActivity extends AppCompatActivity {
+
+    // UI-Elemente
+    private ListView listView;
+    private FloatingActionButton fabAdd;
+
+    // Adapter und Listen für die Daten
+    private ArrayAdapter<String> adapter;
+    private List<String> displayList;  // Was der Nutzer sieht (z.B. "Miete (500€)")
+    private List<Category> categoryObjectList; // Die echten Daten im Hintergrund
+
+    // Firebase
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_manage_categories);
+        // 1. Firebase initialisieren
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        // 2. UI verbinden
+        listView = findViewById(R.id.listView_categories);
+        fabAdd = findViewById(R.id.fab_add_category);
+
+        // 3. Listen vorbereiten
+        displayList = new ArrayList<>();
+        categoryObjectList = new ArrayList<>();
+
+        // 4. Adapter erstellen (Standard Android Layout für Listen)
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
+        listView.setAdapter(adapter);
+
+        // 5. Daten laden starten
+        loadCategories();
+
+        // 6. Button Klick
+        fabAdd.setOnClickListener(v -> showAddDialog());
+        // Klick auf ein Listen-Element -> Bearbeiten/Löschen Dialog öffnen
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            // passende Kategorie-Objekt aus der Liste öffnen
+            Category selectedCategory = categoryObjectList.get(position);
+            showEditDialog(selectedCategory);
+        });
+    }
+
+    // METHODE: DATEN AUS FIREBASE LADEN
+    private void loadCategories() {
+        if (mAuth.getCurrentUser() == null) return;
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Wir nutzen einen "SnapshotListener".
+        // Der ist cool, weil er die Liste AUTOMATISCH aktualisiert, wenn sich in der DB was ändert.
+        db.collection("categories")
+                .whereEqualTo("userId", userId)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Fehler beim Laden", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Listen erst leeren, damit nichts doppelt ist
+                    displayList.clear();
+                    categoryObjectList.clear();
+
+                    if (value != null) {
+                        for (DocumentSnapshot doc : value) {
+                            // Daten in unser Objekt umwandeln
+                            Category cat = doc.toObject(Category.class);
+
+                            // WICHTIG: Die ID speichern, damit wir später löschen können
+                            if (cat != null) {
+                                cat.setId(doc.getId());
+
+                                categoryObjectList.add(cat);
+                                // Hier bauen wir den String, den der Nutzer sieht
+                                displayList.add(cat.getName() + " (Limit: " + cat.getLimit() + "€)");
+                            }
+                        }
+                    }
+                    // Dem Adapter sagen: "Hey, Daten haben sich geändert, Liste neu malen!"
+                    adapter.notifyDataSetChanged();
+                });
+    }
+
+    // Das Pop-up Fenster zum Hinzufügen
+    private void showAddDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Neue Kategorie");
+
+        // Wir bauen ein Layout für das Fenster (zwei Eingabefelder untereinander)
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10); // Ein bisschen Abstand zum Rand
+
+        final EditText inputName = new EditText(this);
+        inputName.setHint("Name (z.B. Urlaub)");
+        layout.addView(inputName);
+
+        final EditText inputLimit = new EditText(this);
+        inputLimit.setHint("Monatslimit (optional)");
+        // Hier sorgen wir dafür, dass eine Zahlentastatur aufgeht
+        inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(inputLimit);
+
+        builder.setView(layout);
+
+        // Button "Speichern"
+        builder.setPositiveButton("Speichern", (dialog, which) -> {
+            String name = inputName.getText().toString().trim();
+            String limitStr = inputLimit.getText().toString().trim();
+
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Name darf nicht leer sein", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            double limit = 0;
+
+            if (!limitStr.isEmpty()) {
+                try {
+                    limit = Double.parseDouble(limitStr);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Ungültiges Limit", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            // Speichern (0 wird als "Kein Limit" gespeichert)
+            saveNewCategory(name, limit);
+        });
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+    //Speichern in Firestore
+    private void saveNewCategory(String name, double limit) {
+        if (mAuth.getCurrentUser() == null) return;
+
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Neues Kategorie-Objekt erstellen (aktuell ausgegeben = 0)
+        Category newCat = new Category(userId, name, limit, 0);
+
+        db.collection("categories")
+                .add(newCat)
+                .addOnSuccessListener(doc -> {
+                    Toast.makeText(this, "Kategorie gespeichert!", Toast.LENGTH_SHORT).show();
+                    // Die Liste aktualisiert sich dank "SnapshotListener" automatisch!
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT).show();
+                });
+    }
+    private void showEditDialog(Category category) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(category.getName() + " bearbeiten");
+
+        // Layout erstellen (Ein Eingabefeld für das Limit)
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        final EditText inputLimit = new EditText(this);
+        inputLimit.setHint("Neues Limit (0 = Kein Limit)");
+        // Das aktuelle Limit direkt in das Feld schreiben, damit man es sieht
+        inputLimit.setText(String.valueOf(category.getLimit()));
+        inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(inputLimit);
+
+        builder.setView(layout);
+
+        // SPEICHERN (Update) - Botton 1
+        builder.setPositiveButton("Speichern", (dialog, which) -> {
+            String limitStr = inputLimit.getText().toString().trim();
+            double newLimit = 0;
+            if (!limitStr.isEmpty()) {
+                try {
+                    newLimit = Double.parseDouble(limitStr);
+                } catch (NumberFormatException e) {
+                    return; // Wenn Quatsch eingegeben wurde, mach nichts
+                }
+            }
+
+            // In Firestore aktualisieren
+            db.collection("categories").document(category.getId())
+                    .update("limit", newLimit)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Limit aktualisiert", Toast.LENGTH_SHORT).show());
+        });
+        // LÖSCHEN (Delete) -> Der "Neutrale" Knopf - Botton 2
+        builder.setNeutralButton("Löschen", (dialog, which) -> {
+            // Firestore Befehl zum Löschen
+            db.collection("categories").document(category.getId())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Kategorie gelöscht", Toast.LENGTH_SHORT).show());
+        });
+        // ABBRECHEN - Botton 3
+        builder.setNegativeButton("Abbrechen", null);
+
+        builder.show();
+    }
+}

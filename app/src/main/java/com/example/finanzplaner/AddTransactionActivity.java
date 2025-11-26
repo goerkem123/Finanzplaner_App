@@ -127,6 +127,17 @@ public class AddTransactionActivity extends AppCompatActivity {
                             categoryNameList.add(cat.getName());
                         }
                     }
+                    // Fallback: Falls der Nutzer ALLES gelöscht hat
+                    if (categoryNameList.isEmpty()) categoryNameList.add("Allgemein");
+
+                    // Den Spinner mit den geladenen Daten füllen
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNameList);
+                    spinnerCategory.setAdapter(adapter);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Kategorien konnten nicht geladen werden.", Toast.LENGTH_SHORT).show()
+                );
+    }
     // Die Logik für den Datums-Wähler
     private void setupDatePicker() {
         // Was passiert, wenn ein Datum ausgewählt wird?

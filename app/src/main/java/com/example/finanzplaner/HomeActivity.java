@@ -74,6 +74,28 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
         loadFinancialData();
     }
+    // Standard-Kategorien erstellen
+    private void checkAndCreateDefaultCategories() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        // Prüfen: Hat dieser User schon irgendwelche Kategorien?
+        db.collection("categories")
+                .whereEqualTo("userId", user.getUid())
+                .limit(1) // Es reicht zu wissen, ob EINE existiert
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        // Liste leer -> Neuer User (oder alle gelöscht). Wir legen Standards an.
+                        createCategory(user.getUid(), "Lebensmittel", 0);
+                        createCategory(user.getUid(), "Miete", 0);
+                        createCategory(user.getUid(), "Gehalt", 0);
+
+                        // Optional: Kleiner Hinweis
+                        // Toast.makeText(this, "Standard-Kategorien eingerichtet.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
     // --- Hauptlogik: Daten aus Firestore laden und berechnen ---
     private void loadFinancialData() {

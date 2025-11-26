@@ -202,5 +202,6 @@ public class HomeActivity extends AppCompatActivity {
             }
             return false;
         });
+        checkAndCreateDefaultCategories();
     }
 }

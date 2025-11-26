@@ -178,5 +178,14 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 40, 50, 10);
+
+        final EditText inputLimit = new EditText(this);
+        inputLimit.setHint("Neues Limit (0 = Kein Limit)");
+        // Das aktuelle Limit direkt in das Feld schreiben, damit man es sieht
+        inputLimit.setText(String.valueOf(category.getLimit()));
+        inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(inputLimit);
+
+        builder.setView(layout);
     }
 }

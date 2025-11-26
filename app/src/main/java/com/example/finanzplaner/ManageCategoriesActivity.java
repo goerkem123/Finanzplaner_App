@@ -1,7 +1,9 @@
 package com.example.finanzplaner;
 
 import android.os.Bundle;
+import android.text.InputType;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -109,6 +111,16 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             LinearLayout layout = new LinearLayout(this);
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setPadding(50, 40, 50, 10); // Ein bisschen Abstand zum Rand
+
+            final EditText inputName = new EditText(this);
+            inputName.setHint("Name (z.B. Urlaub)");
+            layout.addView(inputName);
+
+            final EditText inputLimit = new EditText(this);
+            inputLimit.setHint("Monatslimit (optional)");
+            // Hier sorgen wir dafür, dass eine Zahlentastatur aufgeht
+            inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            layout.addView(inputLimit);
         }
     }
 }

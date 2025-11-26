@@ -37,6 +37,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     // Firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +66,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             Toast.makeText(this, "Hinzufügen kommt im nächsten Schritt!", Toast.LENGTH_SHORT).show();
         });
     }
+
     // METHODE: DATEN AUS FIREBASE LADEN
     private void loadCategories() {
         if (mAuth.getCurrentUser() == null) return;
@@ -102,52 +104,72 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                     // Dem Adapter sagen: "Hey, Daten haben sich geändert, Liste neu malen!"
                     adapter.notifyDataSetChanged();
                 });
-        // Das Pop-up Fenster zum Hinzufügen
-        private void showAddDialog() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Neue Kategorie");
+    }
 
-            // Wir bauen ein Layout für das Fenster (zwei Eingabefelder untereinander)
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setPadding(50, 40, 50, 10); // Ein bisschen Abstand zum Rand
+    // Das Pop-up Fenster zum Hinzufügen
+    private void showAddDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Neue Kategorie");
 
-            final EditText inputName = new EditText(this);
-            inputName.setHint("Name (z.B. Urlaub)");
-            layout.addView(inputName);
+        // Wir bauen ein Layout für das Fenster (zwei Eingabefelder untereinander)
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10); // Ein bisschen Abstand zum Rand
 
-            final EditText inputLimit = new EditText(this);
-            inputLimit.setHint("Monatslimit (optional)");
-            // Hier sorgen wir dafür, dass eine Zahlentastatur aufgeht
-            inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-            layout.addView(inputLimit);
+        final EditText inputName = new EditText(this);
+        inputName.setHint("Name (z.B. Urlaub)");
+        layout.addView(inputName);
 
-            builder.setView(layout);
+        final EditText inputLimit = new EditText(this);
+        inputLimit.setHint("Monatslimit (optional)");
+        // Hier sorgen wir dafür, dass eine Zahlentastatur aufgeht
+        inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(inputLimit);
 
-            // Button "Speichern"
-            builder.setPositiveButton("Speichern", (dialog, which) -> {
-                String name = inputName.getText().toString().trim();
-                String limitStr = inputLimit.getText().toString().trim();
+        builder.setView(layout);
 
-                if (name.isEmpty()) {
-                    Toast.makeText(this, "Name darf nicht leer sein", Toast.LENGTH_SHORT).show();
+        // Button "Speichern"
+        builder.setPositiveButton("Speichern", (dialog, which) -> {
+            String name = inputName.getText().toString().trim();
+            String limitStr = inputLimit.getText().toString().trim();
+
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Name darf nicht leer sein", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            double limit = 0;
+
+            if (!limitStr.isEmpty()) {
+                try {
+                    limit = Double.parseDouble(limitStr);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Ungültiges Limit", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                double limit = 0;
+            }
+            // Speichern (0 wird als "Kein Limit" gespeichert)
+            saveNewCategory(name, limit);
+        });
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+    //Speichern in Firestore
+    private void saveNewCategory(String name, double limit) {
+        if (mAuth.getCurrentUser() == null) return;
 
-                if (!limitStr.isEmpty()) {
-                    try {
-                        limit = Double.parseDouble(limitStr);
-                    } catch (NumberFormatException e) {
-                        Toast.makeText(this, "Ungültiges Limit", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-                // Speichern (0 wird als "Kein Limit" gespeichert)
-                saveNewCategory(name, limit);
-            });
-            builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
-            builder.show();
-        }
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Neues Kategorie-Objekt erstellen (aktuell ausgegeben = 0)
+        Category newCat = new Category(userId, name, limit, 0);
+
+        db.collection("categories")
+                .add(newCat)
+                .addOnSuccessListener(doc -> {
+                    Toast.makeText(this, "Kategorie gespeichert!", Toast.LENGTH_SHORT).show();
+                    // Die Liste aktualisiert sich dank "SnapshotListener" automatisch!
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT).show();
+                });
     }
 }

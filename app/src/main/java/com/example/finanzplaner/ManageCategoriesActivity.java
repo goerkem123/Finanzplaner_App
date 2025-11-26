@@ -121,6 +121,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             // Hier sorgen wir dafür, dass eine Zahlentastatur aufgeht
             inputLimit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
             layout.addView(inputLimit);
+
+            builder.setView(layout);
         }
     }
 }

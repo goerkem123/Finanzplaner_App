@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_categories);
-// 1. Firebase initialisieren
+        // 1. Firebase initialisieren
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -49,8 +50,6 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         categoryObjectList = new ArrayList<>();
 
         // 4. Adapter erstellen (Standard Android Layout für Listen)
-        // Wir benutzen hier ein Layout mit weißer Schrift, falls der Hintergrund dunkel ist,
-        // oder das Standard-Layout. Erstmal Standard: simple_list_item_1
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
         listView.setAdapter(adapter);
 
@@ -62,6 +61,42 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             Toast.makeText(this, "Hinzufügen kommt im nächsten Schritt!", Toast.LENGTH_SHORT).show();
         });
     }
+    // --- METHODE: DATEN AUS FIREBASE LADEN ---
+    private void loadCategories() {
+        if (mAuth.getCurrentUser() == null) return;
+        String userId = mAuth.getCurrentUser().getUid();
 
+        // Wir nutzen einen "SnapshotListener".
+        // Der ist cool, weil er die Liste AUTOMATISCH aktualisiert, wenn sich in der DB was ändert.
+        db.collection("categories")
+                .whereEqualTo("userId", userId)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Fehler beim Laden", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Listen erst leeren, damit nichts doppelt ist
+                    displayList.clear();
+                    categoryObjectList.clear();
+
+                    if (value != null) {
+                        for (DocumentSnapshot doc : value) {
+                            // Daten in unser Objekt umwandeln
+                            Category cat = doc.toObject(Category.class);
+
+                            // WICHTIG: Die ID speichern, damit wir später löschen können
+                            if (cat != null) {
+                                cat.setId(doc.getId());
+
+                                categoryObjectList.add(cat);
+                                // Hier bauen wir den String, den der Nutzer sieht
+                                displayList.add(cat.getName() + " (Limit: " + cat.getLimit() + "€)");
+                            }
+                        }
+                    }
+                    // Dem Adapter sagen: "Hey, Daten haben sich geändert, Liste neu malen!"
+                    adapter.notifyDataSetChanged();
+                });
     }
 }

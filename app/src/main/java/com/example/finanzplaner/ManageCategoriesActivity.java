@@ -61,10 +61,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         // 5. Daten laden starten
         loadCategories();
 
-        // 6. Button Klick (Bereiten wir schonmal vor, lassen ihn aber noch leer oder machen einen Toast)
-        fabAdd.setOnClickListener(v -> {
-            Toast.makeText(this, "Hinzufügen kommt im nächsten Schritt!", Toast.LENGTH_SHORT).show();
-        });
+        // 6. Button Klick
+        fabAdd.setOnClickListener(v -> showAddDialog());
     }
 
     // METHODE: DATEN AUS FIREBASE LADEN

@@ -170,4 +170,13 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                     Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT).show();
                 });
     }
+    private void showEditDialog(Category category) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(category.getName() + " bearbeiten");
+
+        // Layout erstellen (Ein Eingabefeld für das Limit)
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+    }
 }

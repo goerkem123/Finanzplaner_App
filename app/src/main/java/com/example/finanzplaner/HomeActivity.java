@@ -96,6 +96,13 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 });
     }
+    // Hilfsmethode zum Speichern einer Kategorie
+    private void createCategory(String userId, String name, double limit) {
+        // Wir nutzen deinen Category-Konstruktor: (userId, name, limit, current)
+        Category cat = new Category(userId, name, limit, 0.0);
+
+        db.collection("categories").add(cat);
+    }
 
     // --- Hauptlogik: Daten aus Firestore laden und berechnen ---
     private void loadFinancialData() {

@@ -110,7 +110,15 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     // Füllt den Kategorie-Spinner mit einer Liste
+    private void loadCategoriesFromFirestore() {
+        if (mAuth.getCurrentUser() == null) return;
 
+        db.collection("categories")
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
+                .orderBy("name") // Sortiert alphabetisch (A-Z)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    categoryNameList.clear(); // Liste leere
 
     // Die Logik für den Datums-Wähler
     private void setupDatePicker() {

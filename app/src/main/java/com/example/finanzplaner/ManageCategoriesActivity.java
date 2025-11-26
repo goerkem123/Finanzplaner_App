@@ -133,7 +133,21 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                     Toast.makeText(this, "Name darf nicht leer sein", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                double limit = 0;
+
+                if (!limitStr.isEmpty()) {
+                    try {
+                        limit = Double.parseDouble(limitStr);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(this, "Ungültiges Limit", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                // Speichern (0 wird als "Kein Limit" gespeichert)
+                saveNewCategory(name, limit);
             });
+            builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+            builder.show();
         }
     }
 }

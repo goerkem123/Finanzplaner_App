@@ -64,7 +64,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         // --- 5. Die Logik für die Knöpfe einrichten ---
         setupTypeButtons();      // Einnahme/Ausgabe Klick-Logik
-        setupCategorySpinner();  // Kategorien in den Spinner laden
+        loadCategoriesFromFirestore();  // Kategorien in den Spinner laden
         setupDatePicker();       // Datumsauswahl-Dialog
         updateDateLabel();       // Das aktuelle Datum im Textfeld anzeigen
 

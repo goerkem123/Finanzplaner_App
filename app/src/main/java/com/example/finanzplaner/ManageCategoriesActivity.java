@@ -123,6 +123,17 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             layout.addView(inputLimit);
 
             builder.setView(layout);
+
+            // Button "Speichern"
+            builder.setPositiveButton("Speichern", (dialog, which) -> {
+                String name = inputName.getText().toString().trim();
+                String limitStr = inputLimit.getText().toString().trim();
+
+                if (name.isEmpty()) {
+                    Toast.makeText(this, "Name darf nicht leer sein", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            });
         }
     }
 }

@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -119,7 +120,13 @@ public class AddTransactionActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     categoryNameList.clear(); // Liste leere
-
+// Alle gefundenen Kategorien in die Liste packen
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        Category cat = doc.toObject(Category.class);
+                        if (cat.getName() != null) {
+                            categoryNameList.add(cat.getName());
+                        }
+                    }
     // Die Logik für den Datums-Wähler
     private void setupDatePicker() {
         // Was passiert, wenn ein Datum ausgewählt wird?

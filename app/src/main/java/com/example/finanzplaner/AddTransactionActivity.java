@@ -62,6 +62,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         // --- 4. Die Java-Variablen mit den IDs aus dem XML-Design verbinden ---
         initViews();
 
+        categoryNameList = new ArrayList<>();
         // --- 5. Die Logik für die Knöpfe einrichten ---
         setupTypeButtons();      // Einnahme/Ausgabe Klick-Logik
         loadCategoriesFromFirestore();  // Kategorien in den Spinner laden
@@ -116,7 +117,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         db.collection("categories")
                 .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
-                .orderBy("name") // Sortiert alphabetisch (A-Z)
+                //.orderBy("name") // Sortiert alphabetisch (A-Z)
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     categoryNameList.clear(); // Liste leere

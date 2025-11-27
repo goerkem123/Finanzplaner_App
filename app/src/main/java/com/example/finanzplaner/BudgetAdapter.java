@@ -73,7 +73,12 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
                     holder.tvPercent.setText(percentage + "%");
                     holder.tvPercent.setTextColor(orangeColor);
                     holder.progressBar.setProgressTintList(ColorStateList.valueOf(orangeColor));
-
+                } else {
+                    // GRÜN: Alles gut
+                    int greenColor = Color.parseColor("#4CAF50");
+                    holder.tvPercent.setText(percentage + "%");
+                    holder.tvPercent.setTextColor(greenColor);
+                    holder.progressBar.setProgressTintList(ColorStateList.valueOf(greenColor));
                 }
             }
         }

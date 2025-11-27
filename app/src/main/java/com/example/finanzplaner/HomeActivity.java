@@ -161,6 +161,35 @@ public class HomeActivity extends AppCompatActivity {
     }
     // Platzhalter-Methode für den nächsten Schritt
     private void loadTransactions(java.util.List<Category> loadedCategories) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        // SCHRITT 2: Jetzt holen wir die Transaktionen
+        db.collection("transactions")
+                .whereEqualTo("userId", user.getUid())
+                .get()
+                .addOnSuccessListener(transactionSnapshots -> {
+
+                    // Liste für Transaktionen vorbereiten
+                    java.util.List<Transaction> loadedTransactions = new java.util.ArrayList<>();
+
+                    for (DocumentSnapshot doc : transactionSnapshots) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) {
+                            loadedTransactions.add(t);
+                        }
+                    }
+
+                    // Weiter zur Berechnung...
+                    calculateAndShowData(loadedCategories, loadedTransactions); // Nächster Schritt!
+
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(HomeActivity.this, "Transaktionen konnten nicht geladen werden", Toast.LENGTH_SHORT).show();
+                });
+    }
+    // Platzhalter für Schritt 3
+    private void calculateAndShowData(java.util.List<Category> categories, java.util.List<Transaction> transactions) {
         // Kommt gleich...
     }
 

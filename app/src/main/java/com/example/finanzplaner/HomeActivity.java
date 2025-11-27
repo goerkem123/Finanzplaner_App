@@ -135,41 +135,33 @@ public class HomeActivity extends AppCompatActivity {
         // Zeige dem Nutzer, dass geladen wird (optional)
         tvBalance.setText("Lädt...");
 
-        // Abfrage an Firestore: Hole alle Dokumente aus der Sammlung "transactions",
-        // aber NUR die, wo das Feld "userId" mit der ID des aktuellen Nutzers übereinstimmt.
-        db.collection("transactions")
+        //Erst holen wir alle Kategorien des Nutzers
+        db.collection("categories")
                 .whereEqualTo("userId", user.getUid())
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    // Erfolg! Wir haben die Daten. Jetzt wird gerechnet.
-                    double totalIncome = 0;
-                    double totalExpense = 0;
+                .addOnSuccessListener(categorySnapshots -> {
+                    // Wir speichern die Kategorien erstmal in einer temporären Liste
+                    java.util.List<Category> loadedCategories = new java.util.ArrayList<>();
 
-                    // Schleife durch alle gefundenen Transaktionen
-                    for (DocumentSnapshot document : queryDocumentSnapshots) {
-                        // Das Dokument in unser Transaction-Objekt umwandeln
-                        Transaction transaction = document.toObject(Transaction.class);
-
-                        if (transaction != null) {
-                            if ("einnahme".equals(transaction.getType())) {
-                                totalIncome += transaction.getAmount();
-                            } else if ("ausgabe".equals(transaction.getType())) {
-                                totalExpense += transaction.getAmount();
-                            }
+                    for (DocumentSnapshot doc : categorySnapshots) {
+                        Category cat = doc.toObject(Category.class);
+                        if(cat != null) {
+                            cat.setId(doc.getId()); // Wichtig: ID setzen
+                            cat.setCurrent(0);      // Reset: Ausgaben auf 0 setzen
+                            loadedCategories.add(cat);
                         }
                     }
-
-                    // Gesamtsaldo berechnen
-                    double balance = totalIncome - totalExpense;
-
-                    // UI aktualisieren (die Zahlen in die Textfelder schreiben)
-                    updateUI(balance, totalIncome, totalExpense);
+                    // Hier geht es gleich weiter mit den Transaktionen...
+                    loadTransactions(loadedCategories); // Diese Methode erstellen wir im nächsten Schritt!
                 })
                 .addOnFailureListener(e -> {
-                    // Fehler beim Laden
                     tvBalance.setText("Fehler");
-                    Toast.makeText(HomeActivity.this, "Fehler beim Laden der Daten: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, "Kategorien konnten nicht geladen werden" + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+    // Platzhalter-Methode für den nächsten Schritt
+    private void loadTransactions(java.util.List<Category> loadedCategories) {
+        // Kommt gleich...
     }
 
     // Hilfsmethode, um die berechneten Zahlen schön formatiert anzuzeigen

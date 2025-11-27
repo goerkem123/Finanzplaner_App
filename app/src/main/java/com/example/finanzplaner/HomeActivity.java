@@ -24,8 +24,10 @@ public class HomeActivity extends AppCompatActivity {
     private ImageButton btnLogout;
     private ImageButton btnCategories;
     private FloatingActionButton fabAdd;
-    // Die Textfelder für die Zahlen (IDs aus deiner activity_home.xml)
+    private BudgetAdapter budgetAdapter;
     private TextView tvBalance, tvIncome, tvExpense;
+    private androidx.recyclerview.widget.RecyclerView recyclerViewBudgets;
+    private java.util.List<Category> categoryList;
 
     // Firebase
     private FirebaseAuth mAuth;
@@ -45,11 +47,20 @@ public class HomeActivity extends AppCompatActivity {
         btnCategories = findViewById(R.id.btn_categories);
         fabAdd = findViewById(R.id.fab_add_transaction);
 
-        // --- DIE IDS AUS DEM XML-LAYOUT DEINES PARTNERS ---
+        // DIE IDS AUS DEM XML-LAYOUT
         tvBalance = findViewById(R.id.tv_balance);        // Gesamtsaldo
         tvIncome = findViewById(R.id.tv_income_amount);   // Einnahmen
         tvExpense = findViewById(R.id.tv_expense_amount); // Ausgaben
-        // -------------------------------------------------
+
+        // RecyclerView einrichten
+        recyclerViewBudgets = findViewById(R.id.recycler_view_budgets);
+        // Liste untereinander angezeigen
+        recyclerViewBudgets.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+
+        // Leere Liste erstellen und Adapter verbinden
+        categoryList = new java.util.ArrayList<>();
+        budgetAdapter = new BudgetAdapter(categoryList);
+        recyclerViewBudgets.setAdapter(budgetAdapter);
 
         // Logout-Button Logik (erweitert um Firebase Logout)
         btnLogout.setOnClickListener(v -> {

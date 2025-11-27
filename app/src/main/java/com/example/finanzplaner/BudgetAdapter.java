@@ -80,7 +80,12 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
                     holder.tvPercent.setTextColor(greenColor);
                     holder.progressBar.setProgressTintList(ColorStateList.valueOf(greenColor));
                 }
-            }
+            } else {
+                    // Kein Limit -> Alles leer lassen
+                    holder.tvPercent.setText("");
+                    holder.progressBar.setProgress(0);
+                }
+
         }
 
         @Override

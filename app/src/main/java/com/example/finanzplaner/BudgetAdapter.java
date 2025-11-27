@@ -30,13 +30,13 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
         public void onBindViewHolder(@NonNull BudgetViewHolder holder, int position) {
             Category cat = categoryList.get(position);
 
-            // 1. Name setzen
+            // Name setzen
             holder.tvName.setText(cat.getName());
 
             double spent = cat.getCurrent();
             double limit = cat.getLimit();
 
-            // 2. Einfacher Text für Details
+            // Einfacher Text für Details
             String details = String.format(Locale.GERMANY, "%.2f € ausgegeben", spent);
 
             if (limit > 0) {
@@ -50,6 +50,15 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
             // Reset für den nächsten Schritt (damit keine alten Daten drin stehen)
             holder.tvPercent.setText("");
             holder.progressBar.setProgress(0);
+
+            // Prozentberechnung & Farben
+            if (limit > 0) {
+                int percentage = (int) ((spent / limit) * 100);
+
+                // Balken setzen (Maximal 100)
+                holder.progressBar.setMax(100);
+                holder.progressBar.setProgress(Math.min(percentage, 100));
+            }
         }
 
         @Override

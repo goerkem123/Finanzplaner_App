@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Locale;
 
 public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder> {
     private List<Category> categoryList;
@@ -27,7 +28,28 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
 
         @Override
         public void onBindViewHolder(@NonNull BudgetViewHolder holder, int position) {
-            // Hier kommt die Logik rein
+            Category cat = categoryList.get(position);
+
+            // 1. Name setzen
+            holder.tvName.setText(cat.getName());
+
+            double spent = cat.getCurrent();
+            double limit = cat.getLimit();
+
+            // 2. Einfacher Text für Details
+            String details = String.format(Locale.GERMANY, "%.2f € ausgegeben", spent);
+
+            if (limit > 0) {
+                details += String.format(Locale.GERMANY, " von %.2f €", limit);
+            } else {
+                details += " (Kein Limit)";
+            }
+
+            holder.tvDetails.setText(details);
+
+            // Reset für den nächsten Schritt (damit keine alten Daten drin stehen)
+            holder.tvPercent.setText("");
+            holder.progressBar.setProgress(0);
         }
 
         @Override

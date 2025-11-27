@@ -1,5 +1,6 @@
 package com.example.finanzplaner;
 
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -8,14 +9,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder> {
+import java.util.List;
 
-        // Hier kommen später die Daten rein
+public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder> {
+    private List<Category> categoryList;
+    // Daten empfangen
+    public BudgetAdapter(List<Category> categoryList) {
+        this.categoryList = categoryList;
+    }
 
         @NonNull
         @Override
         public BudgetViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return null; // Kommt im nächsten Schritt
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_budget, parent, false);
+            return new BudgetViewHolder(view);
         }
 
         @Override
@@ -25,7 +32,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
 
         @Override
         public int getItemCount() {
-            return 0;
+            return categoryList.size();
         }
 
         // Die innere Klasse, die unsere Views aus dem XML hält

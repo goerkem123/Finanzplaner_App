@@ -24,8 +24,10 @@ public class HomeActivity extends AppCompatActivity {
     private ImageButton btnLogout;
     private ImageButton btnCategories;
     private FloatingActionButton fabAdd;
-    // Die Textfelder für die Zahlen (IDs aus deiner activity_home.xml)
+    private BudgetAdapter budgetAdapter;
     private TextView tvBalance, tvIncome, tvExpense;
+    private androidx.recyclerview.widget.RecyclerView recyclerViewBudgets;
+    private java.util.List<Category> categoryList;
 
     // Firebase
     private FirebaseAuth mAuth;
@@ -45,11 +47,20 @@ public class HomeActivity extends AppCompatActivity {
         btnCategories = findViewById(R.id.btn_categories);
         fabAdd = findViewById(R.id.fab_add_transaction);
 
-        // --- DIE IDS AUS DEM XML-LAYOUT DEINES PARTNERS ---
+        // DIE IDS AUS DEM XML-LAYOUT
         tvBalance = findViewById(R.id.tv_balance);        // Gesamtsaldo
         tvIncome = findViewById(R.id.tv_income_amount);   // Einnahmen
         tvExpense = findViewById(R.id.tv_expense_amount); // Ausgaben
-        // -------------------------------------------------
+
+        // RecyclerView einrichten
+        recyclerViewBudgets = findViewById(R.id.recycler_view_budgets);
+        // Liste untereinander angezeigen
+        recyclerViewBudgets.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+
+        // Leere Liste erstellen und Adapter verbinden
+        categoryList = new java.util.ArrayList<>();
+        budgetAdapter = new BudgetAdapter(categoryList);
+        recyclerViewBudgets.setAdapter(budgetAdapter);
 
         // Logout-Button Logik (erweitert um Firebase Logout)
         btnLogout.setOnClickListener(v -> {
@@ -111,7 +122,7 @@ public class HomeActivity extends AppCompatActivity {
         db.collection("categories").add(cat);
     }
 
-    // --- Hauptlogik: Daten aus Firestore laden und berechnen ---
+    // Hauptlogik: Daten aus Firestore laden und berechnen
     private void loadFinancialData() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
@@ -124,41 +135,100 @@ public class HomeActivity extends AppCompatActivity {
         // Zeige dem Nutzer, dass geladen wird (optional)
         tvBalance.setText("Lädt...");
 
-        // Abfrage an Firestore: Hole alle Dokumente aus der Sammlung "transactions",
-        // aber NUR die, wo das Feld "userId" mit der ID des aktuellen Nutzers übereinstimmt.
+        //Erst holen wir alle Kategorien des Nutzers
+        db.collection("categories")
+                .whereEqualTo("userId", user.getUid())
+                .get()
+                .addOnSuccessListener(categorySnapshots -> {
+                    // Wir speichern die Kategorien erstmal in einer temporären Liste
+                    java.util.List<Category> loadedCategories = new java.util.ArrayList<>();
+
+                    for (DocumentSnapshot doc : categorySnapshots) {
+                        Category cat = doc.toObject(Category.class);
+                        if(cat != null) {
+                            cat.setId(doc.getId()); // Wichtig: ID setzen
+                            cat.setCurrent(0);      // Reset: Ausgaben auf 0 setzen
+                            loadedCategories.add(cat);
+                        }
+                    }
+                    // Hier geht es gleich weiter mit den Transaktionen...
+                    loadTransactions(loadedCategories); // Diese Methode erstellen wir im nächsten Schritt!
+                })
+                .addOnFailureListener(e -> {
+                    tvBalance.setText("Fehler");
+                    Toast.makeText(HomeActivity.this, "Kategorien konnten nicht geladen werden" + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+    private void loadTransactions(java.util.List<Category> loadedCategories) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        // SCHRITT 2: Jetzt holen wir die Transaktionen
         db.collection("transactions")
                 .whereEqualTo("userId", user.getUid())
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    // Erfolg! Wir haben die Daten. Jetzt wird gerechnet.
-                    double totalIncome = 0;
-                    double totalExpense = 0;
+                .addOnSuccessListener(transactionSnapshots -> {
 
-                    // Schleife durch alle gefundenen Transaktionen
-                    for (DocumentSnapshot document : queryDocumentSnapshots) {
-                        // Das Dokument in unser Transaction-Objekt umwandeln
-                        Transaction transaction = document.toObject(Transaction.class);
+                    // Liste für Transaktionen vorbereiten
+                    java.util.List<Transaction> loadedTransactions = new java.util.ArrayList<>();
 
-                        if (transaction != null) {
-                            if ("einnahme".equals(transaction.getType())) {
-                                totalIncome += transaction.getAmount();
-                            } else if ("ausgabe".equals(transaction.getType())) {
-                                totalExpense += transaction.getAmount();
-                            }
+                    for (DocumentSnapshot doc : transactionSnapshots) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) {
+                            loadedTransactions.add(t);
                         }
                     }
 
-                    // Gesamtsaldo berechnen
-                    double balance = totalIncome - totalExpense;
+                    // Weiter zur Berechnung...
+                    calculateAndShowData(loadedCategories, loadedTransactions); // Nächster Schritt!
 
-                    // UI aktualisieren (die Zahlen in die Textfelder schreiben)
-                    updateUI(balance, totalIncome, totalExpense);
                 })
                 .addOnFailureListener(e -> {
-                    // Fehler beim Laden
-                    tvBalance.setText("Fehler");
-                    Toast.makeText(HomeActivity.this, "Fehler beim Laden der Daten: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, "Transaktionen konnten nicht geladen werden", Toast.LENGTH_SHORT).show();
                 });
+    }
+    private void calculateAndShowData(java.util.List<Category> categories, java.util.List<Transaction> transactions) {
+        double totalIncome = 0;
+        double totalExpense = 0;
+
+        // Map für Ausgaben pro Kategorie-Name zu zählen
+        java.util.Map<String, Double> categorySpendingMap = new java.util.HashMap<>();
+
+        // Alle Transaktionen durchgehen und Summen bilden
+        for (Transaction t : transactions) {
+            if ("einnahme".equals(t.getType())) {
+                totalIncome += t.getAmount();
+            } else if ("ausgabe".equals(t.getType())) {
+                totalExpense += t.getAmount();
+
+                // Ausgaben der jeweiligen Kategorie zuordnen
+                String catName = t.getCategory();
+                if (catName != null) {
+                    double currentSum = 0;
+                    if (categorySpendingMap.containsKey(catName)) {
+                        currentSum = categorySpendingMap.get(catName);
+                    }
+                    categorySpendingMap.put(catName, currentSum + t.getAmount());
+                }
+            }
+        }
+
+        // Die berechneten Ausgaben in die Kategorie-Objekte schreiben
+        for (Category cat : categories) {
+            if (categorySpendingMap.containsKey(cat.getName())) {
+                cat.setCurrent(categorySpendingMap.get(cat.getName()));
+            }
+        }
+
+        // UI Updates
+        // Die oberen Karten (Bilanz)
+        double balance = totalIncome - totalExpense;
+        updateUI(balance, totalIncome, totalExpense);
+
+        // Die Budget-Liste unten
+        categoryList.clear();
+        categoryList.addAll(categories);
+        budgetAdapter.notifyDataSetChanged(); // Adapter Bescheid geben
     }
 
     // Hilfsmethode, um die berechneten Zahlen schön formatiert anzuzeigen

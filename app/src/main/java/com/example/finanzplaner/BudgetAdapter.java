@@ -67,6 +67,12 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
                     holder.tvPercent.setText("Limit voll!");
                     holder.tvPercent.setTextColor(redColor);
                     holder.progressBar.setProgressTintList(ColorStateList.valueOf(redColor));
+                } else if (percentage >= 75) {
+                    // ORANGE: Warnung
+                    int orangeColor = Color.parseColor("#FFA500");
+                    holder.tvPercent.setText(percentage + "%");
+                    holder.tvPercent.setTextColor(orangeColor);
+                    holder.progressBar.setProgressTintList(ColorStateList.valueOf(orangeColor));
 
                 }
             }

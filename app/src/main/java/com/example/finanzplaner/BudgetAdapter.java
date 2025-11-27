@@ -1,5 +1,7 @@
 package com.example.finanzplaner;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +60,15 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
                 // Balken setzen (Maximal 100)
                 holder.progressBar.setMax(100);
                 holder.progressBar.setProgress(Math.min(percentage, 100));
+                // --- Die Farb-Ampel ---
+                if (percentage >= 100) {
+                    // ROT: Limit voll
+                    int redColor = Color.parseColor("#D74848");
+                    holder.tvPercent.setText("Limit voll!");
+                    holder.tvPercent.setTextColor(redColor);
+                    holder.progressBar.setProgressTintList(ColorStateList.valueOf(redColor));
+
+                }
             }
         }
 

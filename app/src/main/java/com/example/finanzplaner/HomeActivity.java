@@ -122,7 +122,7 @@ public class HomeActivity extends AppCompatActivity {
         db.collection("categories").add(cat);
     }
 
-    // --- Hauptlogik: Daten aus Firestore laden und berechnen ---
+    // Hauptlogik: Daten aus Firestore laden und berechnen
     private void loadFinancialData() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
@@ -159,7 +159,6 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(HomeActivity.this, "Kategorien konnten nicht geladen werden" + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
-    // Platzhalter-Methode für den nächsten Schritt
     private void loadTransactions(java.util.List<Category> loadedCategories) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -188,9 +187,48 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(HomeActivity.this, "Transaktionen konnten nicht geladen werden", Toast.LENGTH_SHORT).show();
                 });
     }
-    // Platzhalter für Schritt 3
     private void calculateAndShowData(java.util.List<Category> categories, java.util.List<Transaction> transactions) {
-        // Kommt gleich...
+        double totalIncome = 0;
+        double totalExpense = 0;
+
+        // Map für Ausgaben pro Kategorie-Name zu zählen
+        java.util.Map<String, Double> categorySpendingMap = new java.util.HashMap<>();
+
+        // Alle Transaktionen durchgehen und Summen bilden
+        for (Transaction t : transactions) {
+            if ("einnahme".equals(t.getType())) {
+                totalIncome += t.getAmount();
+            } else if ("ausgabe".equals(t.getType())) {
+                totalExpense += t.getAmount();
+
+                // Ausgaben der jeweiligen Kategorie zuordnen
+                String catName = t.getCategory();
+                if (catName != null) {
+                    double currentSum = 0;
+                    if (categorySpendingMap.containsKey(catName)) {
+                        currentSum = categorySpendingMap.get(catName);
+                    }
+                    categorySpendingMap.put(catName, currentSum + t.getAmount());
+                }
+            }
+        }
+
+        // Die berechneten Ausgaben in die Kategorie-Objekte schreiben
+        for (Category cat : categories) {
+            if (categorySpendingMap.containsKey(cat.getName())) {
+                cat.setCurrent(categorySpendingMap.get(cat.getName()));
+            }
+        }
+
+        // UI Updates
+        // Die oberen Karten (Bilanz)
+        double balance = totalIncome - totalExpense;
+        updateUI(balance, totalIncome, totalExpense);
+
+        // Die Budget-Liste unten
+        categoryList.clear();
+        categoryList.addAll(categories);
+        budgetAdapter.notifyDataSetChanged(); // Adapter Bescheid geben
     }
 
     // Hilfsmethode, um die berechneten Zahlen schön formatiert anzuzeigen

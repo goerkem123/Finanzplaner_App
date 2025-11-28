@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.List;
+
 public class TransactionsActivity extends AppCompatActivity {
 
     // UI Elemente
@@ -21,6 +23,11 @@ public class TransactionsActivity extends AppCompatActivity {
     private Spinner spinnerCategory;
     private RecyclerView recyclerView;
     private BottomNavigationView bottomNav;
+
+    // Logik
+    private TransactionsAdapter adapter;
+    private List<Transaction> transactionList;
+    private List<String> categoryList; // Für den Spinner
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

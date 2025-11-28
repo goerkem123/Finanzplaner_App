@@ -20,6 +20,11 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         this.allTransactions = new ArrayList<>(transactionList);
         this.displayedTransactions = transactionList;
     }
+    public void updateData(List<Transaction> newList) {
+        this.allTransactions = new ArrayList<>(newList);
+        this.displayedTransactions = newList;
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override

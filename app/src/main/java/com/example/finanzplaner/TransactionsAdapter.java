@@ -56,6 +56,10 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         }
             // Der Filter (Kategorie)
             boolean matchesCategory = isCategoryAll || t.getCategory().equals(category);
+            // Kombination (UND)
+            if (matchesSearch && matchesCategory) {
+                filteredList.add(t);
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.finanzplaner;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -57,7 +59,27 @@ public class TransactionsActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottomNavigationView);
     }
     private void loadData() {
+        if (mAuth.getCurrentUser() == null) return;
+        String userId = mAuth.getCurrentUser().getUid();
 
+        // Kategorien für den Spinner laden
+        db.collection("categories")
+                .whereEqualTo("userId", userId)
+                .orderBy("name") // Alphabetisch sortieren
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    categoryList = new ArrayList<>();
+                    categoryList.add("Alle"); // Die Option zum Zurücksetzen
+
+                    for (DocumentSnapshot doc : snapshots) {
+                        Category c = doc.toObject(Category.class);
+                        if (c != null) categoryList.add(c.getName());
+                    }
+
+                    // Spinner füllen
+                    ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryList);
+                    spinnerCategory.setAdapter(spinnerAdapter);
+                });
     }
 
     private void setupRecyclerView() {

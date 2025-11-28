@@ -29,6 +29,9 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         this.displayedTransactions = newList;
         notifyDataSetChanged();
     }
+    public void filter(String query, String category) {
+        List<Transaction> filteredList = new ArrayList<>();
+    }
 
     @NonNull
     @Override

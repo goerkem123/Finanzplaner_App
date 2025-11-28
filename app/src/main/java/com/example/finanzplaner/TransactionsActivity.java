@@ -48,7 +48,10 @@ public class TransactionsActivity extends AppCompatActivity {
         setupBottomNavigation();
     }
     private void initViews() {
-
+        etSearch = findViewById(R.id.et_search);
+        spinnerCategory = findViewById(R.id.spinner_filter_category);
+        recyclerView = findViewById(R.id.recycler_view_transactions);
+        bottomNav = findViewById(R.id.bottomNavigationView);
     }
 
     private void setupRecyclerView() {
@@ -56,7 +59,6 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void setupBottomNavigation() {
-        bottomNav = findViewById(R.id.bottomNavigationView); // Eventuell rausnehmen
         // Hier ist "Transaktionen" der aktuelle Tab
         bottomNav.setSelectedItemId(R.id.nav_transactions);
         bottomNav.setOnItemSelectedListener(item -> {

@@ -61,6 +61,9 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                 filteredList.add(t);
             }
         }
+        // Liste austauschen und UI aktualisieren
+        this.displayedTransactions = filteredList;
+        notifyDataSetChanged();
     }
 
     @NonNull

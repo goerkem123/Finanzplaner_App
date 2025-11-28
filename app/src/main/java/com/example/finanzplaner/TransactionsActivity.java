@@ -52,6 +52,7 @@ public class TransactionsActivity extends AppCompatActivity {
         initViews();
         setupRecyclerView();
         setupBottomNavigation();
+        setupFilterListeners();
         loadData();
     }
     private void initViews() {
@@ -108,6 +109,8 @@ public class TransactionsActivity extends AppCompatActivity {
         // Leere Liste übergeben, Daten kommen später
         adapter = new TransactionsAdapter(transactionList);
         recyclerView.setAdapter(adapter);
+    }
+    private void setupFilterListeners() {
     }
 
     private void setupBottomNavigation() {

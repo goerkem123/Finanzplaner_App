@@ -8,8 +8,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>{
     // Zwei Listen: Eine für ALLE Daten (Backup) und eine für die ANZEIGE
@@ -36,7 +39,15 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        // Logik kommt später
+        Transaction t = displayedTransactions.get(position);
+
+        holder.tvTitle.setText(t.getTitle());
+
+        // Datum formatieren (von Millisekunden zu "27.11.2023")
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
+        String dateStr = sdf.format(new Date(t.getTimestamp()));
+
+        holder.tvDateCat.setText(dateStr + " • " + t.getCategory());
     }
 
     @Override

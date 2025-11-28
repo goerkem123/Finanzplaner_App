@@ -41,7 +41,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
     @Override
     public int getItemCount() {
-        return 0;
+        return displayedTransactions.size();
     }
 
     // Die innere Klasse, die die Views hält

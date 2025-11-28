@@ -48,12 +48,16 @@ public class TransactionsActivity extends AppCompatActivity {
         initViews();
         setupRecyclerView();
         setupBottomNavigation();
+        loadData();
     }
     private void initViews() {
         etSearch = findViewById(R.id.et_search);
         spinnerCategory = findViewById(R.id.spinner_filter_category);
         recyclerView = findViewById(R.id.recycler_view_transactions);
         bottomNav = findViewById(R.id.bottomNavigationView);
+    }
+    private void loadData() {
+
     }
 
     private void setupRecyclerView() {

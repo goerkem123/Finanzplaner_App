@@ -10,12 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionsActivity extends AppCompatActivity {
@@ -55,7 +57,11 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        transactionList = new ArrayList<>();
+        // Leere Liste übergeben, Daten kommen später
+        adapter = new TransactionsAdapter(transactionList);
+        recyclerView.setAdapter(adapter);
     }
 
     private void setupBottomNavigation() {

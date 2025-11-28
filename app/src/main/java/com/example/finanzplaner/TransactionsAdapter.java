@@ -8,8 +8,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>{
-    // Hier kommen später die Listen rein
+    // Zwei Listen: Eine für ALLE Daten (Backup) und eine für die ANZEIGE
+    private List<Transaction> allTransactions;
+    private List<Transaction> displayedTransactions;
+
+    public TransactionsAdapter(List<Transaction> transactionList) {
+        this.allTransactions = new ArrayList<>(transactionList);
+        this.displayedTransactions = transactionList;
+    }
 
     @NonNull
     @Override

@@ -54,6 +54,8 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             // Treffer, wenn Titel ODER Datum passt
             matchesSearch = matchesTitle || matchesDate;
         }
+            // Der Filter (Kategorie)
+            boolean matchesCategory = isCategoryAll || t.getCategory().equals(category);
         }
     }
 

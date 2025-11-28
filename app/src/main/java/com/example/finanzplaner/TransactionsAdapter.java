@@ -48,6 +48,9 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         String dateStr = sdf.format(new Date(t.getTimestamp()));
 
         holder.tvDateCat.setText(dateStr + " • " + t.getCategory());
+
+        // Betrag formatieren (z.B. "12,50 €")
+        String amountStr = String.format(Locale.GERMANY, "%.2f €", t.getAmount());
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.example.finanzplaner;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -111,6 +113,21 @@ public class TransactionsActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
     private void setupFilterListeners() {
+        // Suchfeld (reagiert bei jedem Buchstaben)
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilters(); // Filter sofort anwenden
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void applyFilters() {
     }
 
     private void setupBottomNavigation() {

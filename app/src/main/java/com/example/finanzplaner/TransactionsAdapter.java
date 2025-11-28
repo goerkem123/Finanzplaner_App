@@ -31,6 +31,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     }
     public void filter(String query, String category) {
         List<Transaction> filteredList = new ArrayList<>();
+
+        String lowerCaseQuery = query.toLowerCase().trim();
+        
+        boolean isCategoryAll = category.equals("Alle") || category.isEmpty();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
     }
 
     @NonNull

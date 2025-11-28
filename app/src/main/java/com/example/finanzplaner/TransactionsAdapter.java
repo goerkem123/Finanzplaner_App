@@ -33,10 +33,28 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         List<Transaction> filteredList = new ArrayList<>();
 
         String lowerCaseQuery = query.toLowerCase().trim();
-        
+
         boolean isCategoryAll = category.equals("Alle") || category.isEmpty();
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
+        for (Transaction t : allTransactions) {
+        // Die Suche (String ODER Datum)
+        boolean matchesSearch;
+        if (lowerCaseQuery.isEmpty()) {
+            // Wenn nichts im Suchfeld steht, passt "alles"
+            matchesSearch = true;
+        } else {
+            // Suche im Titel
+            boolean matchesTitle = t.getTitle().toLowerCase().contains(lowerCaseQuery);
+
+            // Suche im Datum (Timestamp in Text umwandeln: "27.11.2025")
+            String dateStr = sdf.format(new Date(t.getTimestamp()));
+            boolean matchesDate = dateStr.contains(lowerCaseQuery);
+
+            // Treffer, wenn Titel ODER Datum passt
+            matchesSearch = matchesTitle || matchesDate;
+        }
+        }
     }
 
     @NonNull

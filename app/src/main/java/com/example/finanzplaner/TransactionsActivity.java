@@ -40,11 +40,25 @@ public class TransactionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transactions);
 
-        bottomNav = findViewById(R.id.bottomNavigationView);
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
+        initViews();
+        setupRecyclerView();
+        setupBottomNavigation();
+    }
+    private void initViews() {
+
+    }
+
+    private void setupRecyclerView() {
+        
+    }
+
+    private void setupBottomNavigation() {
+        bottomNav = findViewById(R.id.bottomNavigationView); // Eventuell rausnehmen
         // Hier ist "Transaktionen" der aktuelle Tab
         bottomNav.setSelectedItemId(R.id.nav_transactions);
-
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 

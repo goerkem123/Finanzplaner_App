@@ -13,6 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -28,6 +30,10 @@ public class TransactionsActivity extends AppCompatActivity {
     private TransactionsAdapter adapter;
     private List<Transaction> transactionList;
     private List<String> categoryList; // Für den Spinner
+
+    // Firebase
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

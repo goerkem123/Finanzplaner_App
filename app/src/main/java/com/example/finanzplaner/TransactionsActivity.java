@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +81,24 @@ public class TransactionsActivity extends AppCompatActivity {
                     // Spinner füllen
                     ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryList);
                     spinnerCategory.setAdapter(spinnerAdapter);
+                });
+        // Transaktionen für die Liste laden
+        db.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING) // Neueste zuerst
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    transactionList = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshots) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) transactionList.add(t);
+                    }
+
+                    // Dem Adapter die Daten geben
+                    adapter.updateData(transactionList);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Fehler beim Laden: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

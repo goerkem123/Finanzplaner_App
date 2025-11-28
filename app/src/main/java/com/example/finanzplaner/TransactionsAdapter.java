@@ -1,5 +1,6 @@
 package com.example.finanzplaner;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,14 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
         // Betrag formatieren (z.B. "12,50 €")
         String amountStr = String.format(Locale.GERMANY, "%.2f €", t.getAmount());
+
+        if ("einnahme".equals(t.getType())) {
+            holder.tvAmount.setText("+ " + amountStr);
+            holder.tvAmount.setTextColor(Color.parseColor("#4CAF50")); // Grün
+        } else {
+            holder.tvAmount.setText("- " + amountStr);
+            holder.tvAmount.setTextColor(Color.parseColor("#D74848")); // Rot
+        }
     }
 
     @Override

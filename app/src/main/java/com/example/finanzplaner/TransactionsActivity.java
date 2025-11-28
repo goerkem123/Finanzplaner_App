@@ -137,8 +137,16 @@ public class TransactionsActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
-
+// Werte auslesen und Adapter schicken
     private void applyFilters() {
+        // Sicherheitscheck, falls Daten noch laden
+        if (adapter == null || spinnerCategory.getSelectedItem() == null) return;
+
+        String query = etSearch.getText().toString();
+        String category = spinnerCategory.getSelectedItem().toString();
+
+        // Nur das zeigen was zum Filter und Category
+        adapter.filter(query, category);
     }
 
     private void setupBottomNavigation() {

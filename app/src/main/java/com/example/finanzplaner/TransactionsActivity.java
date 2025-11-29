@@ -96,7 +96,10 @@ public class TransactionsActivity extends AppCompatActivity {
                     transactionList = new ArrayList<>();
                     for (DocumentSnapshot doc : snapshots) {
                         Transaction t = doc.toObject(Transaction.class);
-                        if (t != null) transactionList.add(t);
+                        if (t != null){
+                            t.setId(doc.getId());
+                            transactionList.add(t);
+                        }
                     }
 
                     // Dem Adapter die Daten geben
@@ -112,8 +115,15 @@ public class TransactionsActivity extends AppCompatActivity {
         transactionList = new ArrayList<>();
         // Leere Liste übergeben, Daten kommen später
         adapter = new TransactionsAdapter(transactionList);
+        adapter.setOnTransactionLongClickListener(transaction -> {
+            showDeleteDialog(transaction);
+        });
         recyclerView.setAdapter(adapter);
     }
+
+    private void showDeleteDialog(Transaction transaction) {
+    }
+
     private void setupFilterListeners() {
         // Suchfeld (reagiert bei jedem Buchstaben)
         etSearch.addTextChangedListener(new TextWatcher() {

@@ -19,6 +19,13 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     // Zwei Listen: Eine für ALLE Daten (Backup) und eine für die ANZEIGE
     private List<Transaction> allTransactions;
     private List<Transaction> displayedTransactions;
+    private OnTransactionLongClickListener onLongClickListener;
+    public interface OnTransactionLongClickListener {
+        void onTransactionLongClick(Transaction transaction);
+    }
+    public void setOnTransactionLongClickListener(OnTransactionLongClickListener listener) {
+        this.onLongClickListener = listener;
+    }
 
     public TransactionsAdapter(List<Transaction> transactionList) {
         this.allTransactions = new ArrayList<>(transactionList);
@@ -96,6 +103,13 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             holder.tvAmount.setText("- " + amountStr);
             holder.tvAmount.setTextColor(Color.parseColor("#D74848")); // Rot
         }
+        // langen Klick auf das Element aktivieren
+        holder.itemView.setOnLongClickListener(v -> {
+            if (onLongClickListener != null) {
+                onLongClickListener.onTransactionLongClick(t);
+            }
+            return true;
+        });
     }
 
     @Override

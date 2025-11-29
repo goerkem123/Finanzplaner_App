@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DiagrammeActivity extends AppCompatActivity {
@@ -93,6 +95,17 @@ public class DiagrammeActivity extends AppCompatActivity {
                                 categorySums.put(cat, amount);
                             }
                         }
+                    }
+                    // Daten für MPAndroidChart bereitstellen
+                    List<PieEntry> entries = new ArrayList<>();
+                    for (Map.Entry<String, Double> entry : categorySums.entrySet()) {
+                        entries.add(new PieEntry(entry.getValue().floatValue(), entry.getKey()));
+                    }
+
+                    if (entries.isEmpty()) {
+                        pieChart.clear();
+                        pieChart.setCenterText("Keine Daten");
+                        return;
                     }
                 });
     }

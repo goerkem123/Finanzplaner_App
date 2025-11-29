@@ -12,6 +12,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -122,6 +123,17 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void showDeleteDialog(Transaction transaction) {
+        new AlertDialog.Builder(this)
+                .setTitle("Löschen?")
+                .setMessage("Möchtest du '" + transaction.getTitle() + "' wirklich löschen?")
+                .setPositiveButton("Ja, weg damit", (dialog, which) -> {
+                    deleteTransaction(transaction);
+                })
+                .setNegativeButton("Abbrechen", null)
+                .show();
+    }
+
+    private void deleteTransaction(Transaction transaction) {
     }
 
     private void setupFilterListeners() {

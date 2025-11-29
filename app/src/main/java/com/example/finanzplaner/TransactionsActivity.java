@@ -134,6 +134,21 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void deleteTransaction(Transaction transaction) {
+        if (transaction.getId() == null) {
+            Toast.makeText(this, "Fehler: Keine ID gefunden", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("transactions").document(transaction.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Gelöscht!", Toast.LENGTH_SHORT).show();
+                    // Liste neu laden, damit der Eintrag verschwindet
+                    loadData();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Löschen fehlgeschlagen", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void setupFilterListeners() {

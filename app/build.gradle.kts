@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.legacy.support.v4)
     implementation(libs.cardview)
     implementation(libs.recyclerview)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

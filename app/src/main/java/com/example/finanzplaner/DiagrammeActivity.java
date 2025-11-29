@@ -12,7 +12,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -107,6 +110,15 @@ public class DiagrammeActivity extends AppCompatActivity {
                         pieChart.setCenterText("Keine Daten");
                         return;
                     }
+                    // Dataset erstellen und Farben setzen
+                    PieDataSet dataSet = new PieDataSet(entries, "");
+                    dataSet.setColors(getCustomColors());
+                    dataSet.setSliceSpace(3f);
+                    dataSet.setValueTextColor(Color.WHITE);
+                    dataSet.setValueTextSize(12f);
+
+                    PieData data = new PieData(dataSet);
+                    data.setValueFormatter(new PercentFormatter(pieChart));
                 });
     }
 

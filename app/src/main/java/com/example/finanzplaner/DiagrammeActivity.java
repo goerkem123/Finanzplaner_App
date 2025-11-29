@@ -16,6 +16,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
+
 public class DiagrammeActivity extends AppCompatActivity {
     private PieChart pieChart;
     private BottomNavigationView bottomNav;
@@ -62,6 +64,18 @@ public class DiagrammeActivity extends AppCompatActivity {
         l.setDrawInside(false);
         l.setEnabled(true);
         l.setTextColor(Color.WHITE);
+    }
+    // Unsere eigene Farbpalette
+    private ArrayList<Integer> getCustomColors() {
+        ArrayList<Integer> colors = new ArrayList<>();
+        colors.add(Color.parseColor("#E57373")); // Rot
+        colors.add(Color.parseColor("#64B5F6")); // Blau
+        colors.add(Color.parseColor("#81C784")); // Grün
+        colors.add(Color.parseColor("#FFB74D")); // Orange
+        colors.add(Color.parseColor("#BA68C8")); // Lila
+        colors.add(Color.parseColor("#4DB6AC")); // Türkis
+        colors.add(Color.parseColor("#FFF176")); // Gelb
+        return colors;
     }
 
     private void setupBottomNavigation() {

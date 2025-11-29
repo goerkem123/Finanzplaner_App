@@ -16,9 +16,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiagrammeActivity extends AppCompatActivity {
     private PieChart pieChart;
@@ -74,7 +77,24 @@ public class DiagrammeActivity extends AppCompatActivity {
                 .whereEqualTo("userId", user.getUid())
                 .whereEqualTo("type", type)
                 .get()
-                .addOnSuccessListener(snapshots -> {});
+                .addOnSuccessListener(snapshots -> {
+                    // Kategorien zusammenrechnen (Gruppieren)
+                    Map<String, Double> categorySums = new HashMap<>();
+
+                    for (DocumentSnapshot doc : snapshots) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) {
+                            String cat = t.getCategory();
+                            double amount = t.getAmount();
+
+                            if (categorySums.containsKey(cat)) {
+                                categorySums.put(cat, categorySums.get(cat) + amount);
+                            } else {
+                                categorySums.put(cat, amount);
+                            }
+                        }
+                    }
+                });
     }
 
     // Design des Diagramms einstellen

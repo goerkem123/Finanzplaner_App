@@ -227,7 +227,13 @@ public class HomeActivity extends AppCompatActivity {
 
         // Die Budget-Liste unten
         categoryList.clear();
-        categoryList.addAll(categories);
+
+        // Budget-Liste unten filtern
+        for (Category cat : categories) {
+            if (cat.getLimit() > 0 || cat.getCurrent() > 0) {
+                categoryList.add(cat);
+            }
+        }
         budgetAdapter.notifyDataSetChanged(); // Adapter Bescheid geben
     }
 

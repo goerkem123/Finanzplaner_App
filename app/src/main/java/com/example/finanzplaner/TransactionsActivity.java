@@ -137,7 +137,7 @@ public class TransactionsActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
-// Werte auslesen und Adapter schicken
+    // Werte auslesen und Adapter schicken
     private void applyFilters() {
         // Sicherheitscheck, falls Daten noch laden
         if (adapter == null || spinnerCategory.getSelectedItem() == null) return;

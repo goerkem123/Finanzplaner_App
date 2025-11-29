@@ -15,6 +15,7 @@ import com.github.mikephil.charting.components.Legend;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -65,6 +66,15 @@ public class DiagrammeActivity extends AppCompatActivity {
         });
     }
     private void loadChartData(String type) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        // Nur Transaktionen vom gewählten Typ (Einnahme/Ausgabe) laden
+        db.collection("transactions")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("type", type)
+                .get()
+                .addOnSuccessListener(snapshots -> {});
     }
 
     // Design des Diagramms einstellen

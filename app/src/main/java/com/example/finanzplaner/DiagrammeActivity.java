@@ -3,6 +3,7 @@ package com.example.finanzplaner;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -119,7 +120,15 @@ public class DiagrammeActivity extends AppCompatActivity {
 
                     PieData data = new PieData(dataSet);
                     data.setValueFormatter(new PercentFormatter(pieChart));
-                });
+
+                    // Anzeigen
+                    pieChart.setData(data);
+                    pieChart.invalidate(); // Refresh
+                    pieChart.animateY(1000); // Animation
+                })
+        .addOnFailureListener(e -> {
+            Toast.makeText(this, "Fehler beim Laden", Toast.LENGTH_SHORT).show();
+        });
     }
 
     // Design des Diagramms einstellen

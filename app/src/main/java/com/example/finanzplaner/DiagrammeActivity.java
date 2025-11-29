@@ -1,6 +1,7 @@
 package com.example.finanzplaner;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -10,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -17,7 +19,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class DiagrammeActivity extends AppCompatActivity {
     private PieChart pieChart;
     private BottomNavigationView bottomNav;
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -35,8 +36,32 @@ public class DiagrammeActivity extends AppCompatActivity {
         setupBottomNavigation();
         setupPieChartStyle();
     }
-
+    // Design des Diagramms einstellen
     private void setupPieChartStyle() {
+        pieChart.setUsePercentValues(true);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.setExtraOffsets(5, 10, 5, 5);
+
+        // Donut-Style
+        pieChart.setDrawHoleEnabled(true);
+        pieChart.setHoleColor(Color.TRANSPARENT);
+        pieChart.setHoleRadius(58f);
+        pieChart.setTransparentCircleRadius(61f);
+
+        // Text in der Mitte
+        pieChart.setDrawCenterText(true);
+        pieChart.setCenterText("Ausgaben");
+        pieChart.setCenterTextSize(18f);
+        pieChart.setCenterTextColor(Color.WHITE);
+
+        // Legende (Erklärung der Farben)
+        Legend l = pieChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+        l.setDrawInside(false);
+        l.setEnabled(true);
+        l.setTextColor(Color.WHITE);
     }
 
     private void setupBottomNavigation() {

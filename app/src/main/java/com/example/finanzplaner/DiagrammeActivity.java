@@ -9,24 +9,45 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.github.mikephil.charting.charts.PieChart;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class DiagrammeActivity extends AppCompatActivity {
+    private PieChart pieChart;
+    private BottomNavigationView bottomNav;
+
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_diagramme);
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        pieChart = findViewById(R.id.pieChart);
+        bottomNav = findViewById(R.id.bottomNavigationView);
+        
+        setupBottomNavigation();
+
+        // Setup Diagramm-Design (Noch ohne Daten)
+        setupPieChartStyle();
 
         // Dieser Tab ist hier aktiv
-        bottomNav.setSelectedItemId(R.id.nav_diagramme);
 
+    }
+
+    private void setupPieChartStyle() {
+    }
+
+    private void setupBottomNavigation() {
+        bottomNav.setSelectedItemId(R.id.nav_diagramme);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.nav_home) {
                 startActivity(new Intent(this, HomeActivity.class));
                 finish();

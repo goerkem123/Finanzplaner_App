@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 
 public class DiagrammeActivity extends AppCompatActivity {
     private PieChart pieChart;
+    private TabLayout tabLayout;
     private BottomNavigationView bottomNav;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -33,11 +35,38 @@ public class DiagrammeActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         pieChart = findViewById(R.id.pieChart);
+        tabLayout = findViewById(R.id.tabLayout_type);
         bottomNav = findViewById(R.id.bottomNavigationView);
         
         setupBottomNavigation();
         setupPieChartStyle();
+        setupTabs();
+        loadChartData("ausgabe"); // Standard-Start
     }
+
+    private void setupTabs() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    // Linker Tab: Ausgaben
+                    pieChart.setCenterText("Ausgaben");
+                    loadChartData("ausgabe");
+                } else {
+                    // Rechter Tab: Einnahmen
+                    pieChart.setCenterText("Einnahmen");
+                    loadChartData("einnahme");
+                }
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+    private void loadChartData(String type) {
+    }
+
     // Design des Diagramms einstellen
     private void setupPieChartStyle() {
         pieChart.setUsePercentValues(true);

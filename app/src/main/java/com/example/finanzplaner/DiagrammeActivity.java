@@ -33,12 +33,7 @@ public class DiagrammeActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottomNavigationView);
         
         setupBottomNavigation();
-
-        // Setup Diagramm-Design (Noch ohne Daten)
         setupPieChartStyle();
-
-        // Dieser Tab ist hier aktiv
-
     }
 
     private void setupPieChartStyle() {

@@ -93,4 +93,22 @@ public class FirestoreManager {
                 .addOnSuccessListener(aVoid -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
+    // Methode D: Neue Transaktion speichern
+    public void saveTransaction(Transaction transaction, FirestoreCallback<Void> callback) {
+        if (mAuth.getCurrentUser() == null) {
+            callback.onFailure(new Exception("Nicht eingeloggt"));
+            return;
+        }
+
+        // Wir fügen das Objekt der Sammlung hinzu
+        db.collection("transactions")
+                .add(transaction)
+                .addOnSuccessListener(documentReference -> {
+                    // Erfolg! Wir geben null zurück, da wir keine Daten brauchen
+                    callback.onCallback(null);
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure(e);
+                });
+    }
 }

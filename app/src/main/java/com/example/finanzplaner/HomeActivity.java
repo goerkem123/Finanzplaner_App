@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.List;
 import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
@@ -31,7 +32,6 @@ public class HomeActivity extends AppCompatActivity {
 
     // Firebase
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +40,6 @@ public class HomeActivity extends AppCompatActivity {
 
         // Firebase initialisieren
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         // Views verbinden
         btnLogout = findViewById(R.id.btn_logout);
@@ -97,32 +96,33 @@ public class HomeActivity extends AppCompatActivity {
     }
     // Standard-Kategorien erstellen
     private void checkAndCreateDefaultCategories() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
+        if (mAuth.getCurrentUser() == null) return;
 
-        // Prüfen: Hat dieser User schon irgendwelche Kategorien?
-        db.collection("categories")
-                .whereEqualTo("userId", user.getUid())
-                .limit(1) // Es reicht zu wissen, ob EINE existiert
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        // Liste leer -> Neuer User (oder alle gelöscht). Wir legen Standards an.
-                        createCategory(user.getUid(), "Lebensmittel", 0);
-                        createCategory(user.getUid(), "Miete", 0);
-                        createCategory(user.getUid(), "Gehalt", 0);
-
-                        // Optional: Kleiner Hinweis
-                        // Toast.makeText(this, "Standard-Kategorien eingerichtet.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // Wir nutzen einfach getCategories um zu prüfen, ob es welche gibt
+        FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
+            @Override
+            public void onCallback(List<Category> result) {
+                if (result.isEmpty()) {
+                    createCategory("Lebensmittel");
+                    createCategory("Miete");
+                    createCategory("Gehalt");
+                }
+            }
+            @Override
+            public void onFailure(Exception e) { /* Egal */ }
+        });
     }
     // Hilfsmethode zum Speichern einer Kategorie
     private void createCategory(String userId, String name, double limit) {
-        // Wir nutzen deinen Category-Konstruktor: (userId, name, limit, current)
-        Category cat = new Category(userId, name, limit, 0.0);
+        if (mAuth.getCurrentUser() == null) return;
+        Category cat = new Category(mAuth.getCurrentUser().getUid(), name, 0, 0);
 
-        db.collection("categories").add(cat);
+        FirestoreManager.getInstance().addCategory(cat, new FirestoreCallback<Void>() {
+            @Override
+            public void onCallback(Void result) {} // Erfolg, nix tun
+            @Override
+            public void onFailure(Exception e) {}
+        });
     }
 
     // Hauptlogik: Daten aus Firestore laden und berechnen

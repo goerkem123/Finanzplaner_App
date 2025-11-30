@@ -106,6 +106,12 @@ public class ReportsActivity extends AppCompatActivity {
         paint.setColor(Color.LTGRAY);
         paint.setStrokeWidth(2);
         canvas.drawLine(50, 100, 545, 100, paint);
+        // ... (Fortsetzung)
+
+        // Liste zeichnen
+        int y = 140; // Start-Höhe für die erste Zeile
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(12);
     }
 
     private void setupBottomNavigation() {

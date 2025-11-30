@@ -16,6 +16,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,7 +162,25 @@ public class ReportsActivity extends AppCompatActivity {
 
         // Seite abschließen
         document.finishPage(page);
+        // Datei speichern (im Cache-Ordner, damit wir keine Speicher-Rechte brauchen)
+        File file = new File(getCacheDir(), "Finanzbericht.pdf");
 
+        try {
+            document.writeTo(new FileOutputStream(file));
+
+            // Teilen-Intent starten
+            sharePdf(file); // Hilfsmethode starten
+
+        } catch (IOException e) {
+            Toast.makeText(this, "Fehler beim Speichern: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } finally {
+            document.close();
+            btnGenerate.setEnabled(true);
+            btnGenerate.setText("PDF Erstellen & Teilen");
+        }
+    }
+    // Hilfsmethode zum Teilen
+    private void sharePdf(File file) {
     }
 
     private void setupBottomNavigation() {

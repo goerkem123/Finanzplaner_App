@@ -2,21 +2,25 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#595757"
+    tools:context=".ReportsActivity">
 
     <TextView
         android:id="@+id/tv_reports"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Berichte"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="32dp"
+        android:text="Monatsbericht"
+        android:textColor="#FFFEFE"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.203"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.061" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
@@ -29,4 +33,43 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         app:menu="@menu/bottom_menu" />
+
+    <ImageView
+        android:id="@+id/iv_pdf_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        app:tint="#FFFFFF"
+        app:layout_constraintBottom_toTopOf="@+id/tv_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_reports"
+        app:layout_constraintVertical_bias="0.375"
+        app:srcCompat="@drawable/ic_insert_drive_file" />
+
+    <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="156dp"
+        android:gravity="center"
+        android:text="Erstelle eine PDF-Übersicht deiner Finanzen für den aktuellen Monat."
+        android:textColor="#CCCCCC"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_generate_pdf"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_generate_pdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:backgroundTint="#4CAF50"
+        android:text="PDF Erstellen &amp; Teilen"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

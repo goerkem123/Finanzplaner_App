@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -29,16 +30,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.LoginTitle), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         // 1) Views verbinden
         etemail = findViewById(R.id.email);
@@ -98,5 +92,18 @@ public class LoginActivity extends AppCompatActivity {
             Intent i = new Intent(this, RegisterActivity.class);
             startActivity(i);
         });
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Prüfen, ob der Nutzer schon eingeloggt ist (nicht null)
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        // Wenn User da ist UND E-Mail bestätigt ist -> Sofort zum Home!
+        if (currentUser != null && currentUser.isEmailVerified()) {
+            Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(i);
+            finish(); // Login-Fenster schließen, damit man nicht zurück kann
+        }
     }
 }

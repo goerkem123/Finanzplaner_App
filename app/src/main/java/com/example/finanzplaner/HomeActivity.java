@@ -66,6 +66,9 @@ public class HomeActivity extends AppCompatActivity {
         btnLogout.setOnClickListener(v -> {
             mAuth.signOut(); // Nutzer bei Firebase ausloggen
             Intent i = new Intent(HomeActivity.this, LoginActivity.class);
+            // Diese Flags löschen die gesamte Historie (Back Stack)
+            // Damit kann man nicht mehr "Zurück" in die App gehen.
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
             finish();
         });

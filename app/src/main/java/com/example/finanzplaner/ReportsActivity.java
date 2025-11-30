@@ -23,8 +23,16 @@ public class ReportsActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         btnGenerate = findViewById(R.id.btn_generate_pdf);
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        setupBottomNavigation();
 
+        btnGenerate.setOnClickListener(v -> loadDataAndCreatePdf());
+    }
+
+    private void loadDataAndCreatePdf() {
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         // Hier ist der Reports-Tab aktiv
         bottomNav.setSelectedItemId(R.id.nav_reports);
 
@@ -49,5 +57,6 @@ public class ReportsActivity extends AppCompatActivity {
             }
             return false;
         });
+
     }
 }

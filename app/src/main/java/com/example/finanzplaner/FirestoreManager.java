@@ -58,4 +58,26 @@ public class FirestoreManager {
                     callback.onFailure(e);
                 });
     }
+    // Methode B: Kategorien laden (Alphabetisch sortiert)
+    public void getCategories(FirestoreCallback<List<Category>> callback) {
+        if (mAuth.getCurrentUser() == null) return;
+        String userId = mAuth.getCurrentUser().getUid();
+
+        db.collection("categories")
+                .whereEqualTo("userId", userId)
+                .orderBy("name")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    List<Category> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshots) {
+                        Category c = doc.toObject(Category.class);
+                        if (c != null) {
+                            c.setId(doc.getId());
+                            list.add(c);
+                        }
+                    }
+                    callback.onCallback(list);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
 }

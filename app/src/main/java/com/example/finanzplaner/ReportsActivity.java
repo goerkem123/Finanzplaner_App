@@ -102,6 +102,10 @@ public class ReportsActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.GERMANY);
         String currentMonth = sdf.format(new Date());
         canvas.drawText("Zeitraum: " + currentMonth, 50, 85, paint);
+        // Linie ziehen
+        paint.setColor(Color.LTGRAY);
+        paint.setStrokeWidth(2);
+        canvas.drawLine(50, 100, 545, 100, paint);
     }
 
     private void setupBottomNavigation() {

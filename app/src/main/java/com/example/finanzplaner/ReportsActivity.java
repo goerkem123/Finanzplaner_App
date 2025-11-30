@@ -31,7 +31,6 @@ import java.util.Locale;
 public class ReportsActivity extends AppCompatActivity {
     private Button btnGenerate;
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +38,6 @@ public class ReportsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reports);
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
         btnGenerate = findViewById(R.id.btn_generate_pdf);
 
         setupBottomNavigation();
@@ -48,8 +46,7 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
     private void loadDataAndCreatePdf() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
+        if (mAuth.getCurrentUser() == null) return;
 
         btnGenerate.setEnabled(false); // Button sperren
         btnGenerate.setText("Lade Daten...");
@@ -60,32 +57,28 @@ public class ReportsActivity extends AppCompatActivity {
         cal.set(Calendar.HOUR_OF_DAY, 0);
         long startOfMonth = cal.getTimeInMillis();
 
-        db.collection("transactions")
-                .whereEqualTo("userId", user.getUid())
-                .whereGreaterThanOrEqualTo("timestamp", startOfMonth) // Ab dem 1. des Monats
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    List<Transaction> transactions = new ArrayList<>();
-                    for (DocumentSnapshot doc : snapshots) {
-                        Transaction t = doc.toObject(Transaction.class);
-                        if (t != null) transactions.add(t);
-                    }
+        //Laden über den Manager
+        FirestoreManager.getInstance().getTransactionsFromDate(startOfMonth, new FirestoreCallback<List<Transaction>>() {
+            @Override
+            public void onCallback(List<Transaction> transactions) {
+                if (transactions.isEmpty()) {
+                    Toast.makeText(ReportsActivity.this, "Keine Daten für diesen Monat!", Toast.LENGTH_SHORT).show();
+                    resetButton();
+                    return;
+                }
+                createPdf(transactions);
+            }
 
-                    if (transactions.isEmpty()) {
-                        Toast.makeText(this, "Keine Daten für diesen Monat!", Toast.LENGTH_SHORT).show();
-                        btnGenerate.setEnabled(true);
-                        btnGenerate.setText("PDF Erstellen & Teilen");
-                        return;
-                    }
-
-                    // Daten sind da! Jetzt PDF bauen (Nächster Schritt)
-                    createPdf(transactions);
-
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnGenerate.setEnabled(true);
-                });
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(ReportsActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                resetButton();
+            }
+        });
+    }
+    private void resetButton() {
+        btnGenerate.setEnabled(true);
+        btnGenerate.setText("PDF Erstellen & Teilen");
     }
 
     private void createPdf(List<Transaction> transactions) {

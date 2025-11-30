@@ -11,20 +11,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +37,6 @@ public class TransactionsActivity extends AppCompatActivity {
 
     // Firebase
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +44,6 @@ public class TransactionsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_transactions);
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         initViews();
         setupRecyclerView();
@@ -70,45 +61,37 @@ public class TransactionsActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() == null) return;
         String userId = mAuth.getCurrentUser().getUid();
 
-        // Kategorien für den Spinner laden
-        db.collection("categories")
-                .whereEqualTo("userId", userId)
-                .orderBy("name") // Alphabetisch sortieren
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    categoryList = new ArrayList<>();
-                    categoryList.add("Alle"); // Die Option zum Zurücksetzen
+        // Kategorien laden für Spinner
+        FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
+            @Override
+            public void onCallback(List<Category> result) {
+                categoryList = new ArrayList<>();
+                categoryList.add("Alle");
+                for (Category c : result) {
+                    categoryList.add(c.getName());
+                }
+                ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(TransactionsActivity.this, android.R.layout.simple_spinner_dropdown_item, categoryList);
+                spinnerCategory.setAdapter(spinnerAdapter);
+            }
 
-                    for (DocumentSnapshot doc : snapshots) {
-                        Category c = doc.toObject(Category.class);
-                        if (c != null) categoryList.add(c.getName());
-                    }
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(TransactionsActivity.this, "Fehler Kategorien: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        // Transaktionen laden
+        FirestoreManager.getInstance().getTransactions(new FirestoreCallback<List<Transaction>>() {
+            @Override
+            public void onCallback(List<Transaction> result) {
+                transactionList = result;
+                adapter.updateData(transactionList);
+            }
 
-                    // Spinner füllen
-                    ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryList);
-                    spinnerCategory.setAdapter(spinnerAdapter);
-                });
-        // Transaktionen für die Liste laden
-        db.collection("transactions")
-                .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING) // Neueste zuerst
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    transactionList = new ArrayList<>();
-                    for (DocumentSnapshot doc : snapshots) {
-                        Transaction t = doc.toObject(Transaction.class);
-                        if (t != null){
-                            t.setId(doc.getId());
-                            transactionList.add(t);
-                        }
-                    }
-
-                    // Dem Adapter die Daten geben
-                    adapter.updateData(transactionList);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Fehler beim Laden: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(TransactionsActivity.this, "Fehler Transaktionen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -134,21 +117,19 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void deleteTransaction(Transaction transaction) {
-        if (transaction.getId() == null) {
-            Toast.makeText(this, "Fehler: Keine ID gefunden", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        FirestoreManager.getInstance().deleteTransaction(transaction.getId(), new FirestoreCallback<Void>() {
+            @Override
+            public void onCallback(Void result) {
+                Toast.makeText(TransactionsActivity.this, "Gelöscht!", Toast.LENGTH_SHORT).show();
+                // Liste aktualisieren (lädt alles neu)
+                loadData();
+            }
 
-        db.collection("transactions").document(transaction.getId())
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Gelöscht!", Toast.LENGTH_SHORT).show();
-                    // Liste neu laden, damit der Eintrag verschwindet
-                    loadData();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Löschen fehlgeschlagen", Toast.LENGTH_SHORT).show();
-                });
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(TransactionsActivity.this, "Löschen fehlgeschlagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupFilterListeners() {

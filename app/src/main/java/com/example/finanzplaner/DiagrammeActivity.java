@@ -5,11 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -20,8 +16,6 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -75,60 +69,63 @@ public class DiagrammeActivity extends AppCompatActivity {
         });
     }
     private void loadChartData(String type) {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
+        FirestoreManager.getInstance().getTransactions(new FirestoreCallback<List<Transaction>>() {
+            @Override
+            public void onCallback(List<Transaction> result) {
 
-        // Nur Transaktionen vom gewählten Typ (Einnahme/Ausgabe) laden
-        db.collection("transactions")
-                .whereEqualTo("userId", user.getUid())
-                .whereEqualTo("type", type)
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    // Kategorien zusammenrechnen (Gruppieren)
-                    Map<String, Double> categorySums = new HashMap<>();
+                // Kategorien zusammenrechnen (Gruppieren)
+                Map<String, Double> categorySums = new HashMap<>();
 
-                    for (DocumentSnapshot doc : snapshots) {
-                        Transaction t = doc.toObject(Transaction.class);
-                        if (t != null) {
-                            String cat = t.getCategory();
-                            double amount = t.getAmount();
+                for (Transaction t : result) {
+                    // Filtern: Passt der Typ (einnahme/ausgabe) zur Auswahl?
+                    if (t.getType().equals(type)) {
+                        String cat = t.getCategory();
+                        double amount = t.getAmount();
 
-                            if (categorySums.containsKey(cat)) {
-                                categorySums.put(cat, categorySums.get(cat) + amount);
-                            } else {
-                                categorySums.put(cat, amount);
-                            }
+                        if (categorySums.containsKey(cat)) {
+                            categorySums.put(cat, categorySums.get(cat) + amount);
+                        } else {
+                            categorySums.put(cat, amount);
                         }
                     }
-                    // Daten für MPAndroidChart bereitstellen
-                    List<PieEntry> entries = new ArrayList<>();
-                    for (Map.Entry<String, Double> entry : categorySums.entrySet()) {
-                        entries.add(new PieEntry(entry.getValue().floatValue(), entry.getKey()));
-                    }
+                }
 
-                    if (entries.isEmpty()) {
-                        pieChart.clear();
-                        pieChart.setCenterText("Keine Daten");
-                        return;
-                    }
-                    // Dataset erstellen und Farben setzen
-                    PieDataSet dataSet = new PieDataSet(entries, "");
-                    dataSet.setColors(getCustomColors());
-                    dataSet.setSliceSpace(3f);
-                    dataSet.setValueTextColor(Color.WHITE);
-                    dataSet.setValueTextSize(12f);
+                updateChart(categorySums);
+            }
 
-                    PieData data = new PieData(dataSet);
-                    data.setValueFormatter(new PercentFormatter(pieChart));
-
-                    // Anzeigen
-                    pieChart.setData(data);
-                    pieChart.invalidate(); // Refresh
-                    pieChart.animateY(1000); // Animation
-                })
-        .addOnFailureListener(e -> {
-            Toast.makeText(this, "Fehler beim Laden", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(DiagrammeActivity.this, "Fehler beim Laden", Toast.LENGTH_SHORT).show();
+            }
         });
+    }
+
+    private void updateChart(Map<String, Double> categorySums) {
+        List<PieEntry> entries = new ArrayList<>();
+        for (Map.Entry<String, Double> entry : categorySums.entrySet()) {
+            entries.add(new PieEntry(entry.getValue().floatValue(), entry.getKey()));
+        }
+
+        if (entries.isEmpty()) {
+            pieChart.clear();
+            pieChart.setCenterText("Keine Daten");
+            pieChart.invalidate();
+            return;
+        }
+
+        PieDataSet dataSet = new PieDataSet(entries, "");
+        dataSet.setColors(getCustomColors());
+        dataSet.setSliceSpace(3f);
+        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setValueTextSize(12f);
+
+        PieData data = new PieData(dataSet);
+        data.setValueFormatter(new PercentFormatter(pieChart));
+
+        pieChart.setData(data);
+        pieChart.invalidate();
+        pieChart.animateY(1000);
+
     }
 
     // Design des Diagramms einstellen

@@ -5,17 +5,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.List;
 import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
@@ -31,7 +27,6 @@ public class HomeActivity extends AppCompatActivity {
 
     // Firebase
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +35,6 @@ public class HomeActivity extends AppCompatActivity {
 
         // Firebase initialisieren
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         // Views verbinden
         btnLogout = findViewById(R.id.btn_logout);
@@ -97,99 +91,72 @@ public class HomeActivity extends AppCompatActivity {
     }
     // Standard-Kategorien erstellen
     private void checkAndCreateDefaultCategories() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
+        if (mAuth.getCurrentUser() == null) return;
 
-        // Prüfen: Hat dieser User schon irgendwelche Kategorien?
-        db.collection("categories")
-                .whereEqualTo("userId", user.getUid())
-                .limit(1) // Es reicht zu wissen, ob EINE existiert
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        // Liste leer -> Neuer User (oder alle gelöscht). Wir legen Standards an.
-                        createCategory(user.getUid(), "Lebensmittel", 0);
-                        createCategory(user.getUid(), "Miete", 0);
-                        createCategory(user.getUid(), "Gehalt", 0);
-
-                        // Optional: Kleiner Hinweis
-                        // Toast.makeText(this, "Standard-Kategorien eingerichtet.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // Wir nutzen einfach getCategories um zu prüfen, ob es welche gibt
+        FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
+            @Override
+            public void onCallback(List<Category> result) {
+                if (result.isEmpty()) {
+                    createCategory("Lebensmittel");
+                    createCategory("Miete");
+                    createCategory("Gehalt");
+                }
+            }
+            @Override
+            public void onFailure(Exception e) { /* Egal */ }
+        });
     }
     // Hilfsmethode zum Speichern einer Kategorie
-    private void createCategory(String userId, String name, double limit) {
-        // Wir nutzen deinen Category-Konstruktor: (userId, name, limit, current)
-        Category cat = new Category(userId, name, limit, 0.0);
+    private void createCategory(String name) {
+        if (mAuth.getCurrentUser() == null) return;
+        Category cat = new Category(mAuth.getCurrentUser().getUid(), name, 0, 0);
 
-        db.collection("categories").add(cat);
+        FirestoreManager.getInstance().addCategory(cat, new FirestoreCallback<Void>() {
+            @Override
+            public void onCallback(Void result) {} // Erfolg, nix tun
+            @Override
+            public void onFailure(Exception e) {}
+        });
     }
 
     // Hauptlogik: Daten aus Firestore laden und berechnen
     private void loadFinancialData() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
-            // Sollte nicht passieren, aber sicher ist sicher: Zurück zum Login
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return;
-        }
-
-        // Zeige dem Nutzer, dass geladen wird (optional)
+        if (mAuth.getCurrentUser() == null) return;
         tvBalance.setText("Lädt...");
 
-        //Erst holen wir alle Kategorien des Nutzers
-        db.collection("categories")
-                .whereEqualTo("userId", user.getUid())
-                .get()
-                .addOnSuccessListener(categorySnapshots -> {
-                    // Wir speichern die Kategorien erstmal in einer temporären Liste
-                    java.util.List<Category> loadedCategories = new java.util.ArrayList<>();
+        // 1. Kategorien laden
+        FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
+            @Override
+            public void onCallback(List<Category> categories) {
+                // Reset der aktuellen Werte
+                for(Category c : categories) c.setCurrent(0);
 
-                    for (DocumentSnapshot doc : categorySnapshots) {
-                        Category cat = doc.toObject(Category.class);
-                        if(cat != null) {
-                            cat.setId(doc.getId()); // Wichtig: ID setzen
-                            cat.setCurrent(0);      // Reset: Ausgaben auf 0 setzen
-                            loadedCategories.add(cat);
-                        }
-                    }
-                    // Hier geht es gleich weiter mit den Transaktionen...
-                    loadTransactions(loadedCategories); // Diese Methode erstellen wir im nächsten Schritt!
-                })
-                .addOnFailureListener(e -> {
-                    tvBalance.setText("Fehler");
-                    Toast.makeText(HomeActivity.this, "Kategorien konnten nicht geladen werden" + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                // 2. Transaktionen laden (verschachtelt)
+                loadTransactionsAndCalculate(categories);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                tvBalance.setText("Fehler");
+            }
+        });
+
     }
-    private void loadTransactions(java.util.List<Category> loadedCategories) {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
 
-        // SCHRITT 2: Jetzt holen wir die Transaktionen
-        db.collection("transactions")
-                .whereEqualTo("userId", user.getUid())
-                .get()
-                .addOnSuccessListener(transactionSnapshots -> {
-
-                    // Liste für Transaktionen vorbereiten
-                    java.util.List<Transaction> loadedTransactions = new java.util.ArrayList<>();
-
-                    for (DocumentSnapshot doc : transactionSnapshots) {
-                        Transaction t = doc.toObject(Transaction.class);
-                        if (t != null) {
-                            loadedTransactions.add(t);
-                        }
-                    }
-
-                    // Weiter zur Berechnung...
-                    calculateAndShowData(loadedCategories, loadedTransactions); // Nächster Schritt!
-
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(HomeActivity.this, "Transaktionen konnten nicht geladen werden", Toast.LENGTH_SHORT).show();
-                });
+    private void loadTransactionsAndCalculate(List<Category> categories) {
+        FirestoreManager.getInstance().getTransactions(new FirestoreCallback<List<Transaction>>() {
+            @Override
+            public void onCallback(List<Transaction> transactions) {
+                calculateAndShowData(categories, transactions);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                tvBalance.setText("Fehler");
+            }
+        });
     }
+
     private void calculateAndShowData(java.util.List<Category> categories, java.util.List<Transaction> transactions) {
         double totalIncome = 0;
         double totalExpense = 0;

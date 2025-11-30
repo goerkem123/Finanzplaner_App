@@ -8,17 +8,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +29,6 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     private List<Category> categoryObjectList; // Die echten Daten im Hintergrund
 
     // Firebase
-    private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
     @Override
@@ -43,7 +36,6 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_categories);
         // 1. Firebase initialisieren
-        db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
         // 2. UI verbinden
@@ -71,43 +63,28 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         });
     }
 
-    // METHODE: DATEN AUS FIREBASE LADEN
+    // Laden über den Manager
     private void loadCategories() {
         if (mAuth.getCurrentUser() == null) return;
-        String userId = mAuth.getCurrentUser().getUid();
 
-        // Wir nutzen einen "SnapshotListener".
-        // Der ist cool, weil er die Liste AUTOMATISCH aktualisiert, wenn sich in der DB was ändert.
-        db.collection("categories")
-                .whereEqualTo("userId", userId)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        Toast.makeText(this, "Fehler beim Laden", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Listen erst leeren, damit nichts doppelt ist
+        FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
+                @Override
+                public void onCallback(List<Category> result) {
                     displayList.clear();
                     categoryObjectList.clear();
 
-                    if (value != null) {
-                        for (DocumentSnapshot doc : value) {
-                            // Daten in unser Objekt umwandeln
-                            Category cat = doc.toObject(Category.class);
-
-                            // WICHTIG: Die ID speichern, damit wir später löschen können
-                            if (cat != null) {
-                                cat.setId(doc.getId());
-
-                                categoryObjectList.add(cat);
-                                // Hier bauen wir den String, den der Nutzer sieht
-                                displayList.add(cat.getName() + " (Limit: " + cat.getLimit() + "€)");
-                            }
-                        }
+                    for (Category cat : result) {
+                        categoryObjectList.add(cat);
+                        displayList.add(cat.getName() + " (Limit: " + cat.getLimit() + "€)");
                     }
-                    // Dem Adapter sagen: "Hey, Daten haben sich geändert, Liste neu malen!"
                     adapter.notifyDataSetChanged();
-                });
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Toast.makeText(ManageCategoriesActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
     }
 
     // Das Pop-up Fenster zum Hinzufügen
@@ -161,20 +138,20 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     private void saveNewCategory(String name, double limit) {
         if (mAuth.getCurrentUser() == null) return;
 
-        String userId = mAuth.getCurrentUser().getUid();
+        Category newCat = new Category(mAuth.getCurrentUser().getUid(), name, limit, 0);
 
-        // Neues Kategorie-Objekt erstellen (aktuell ausgegeben = 0)
-        Category newCat = new Category(userId, name, limit, 0);
+        FirestoreManager.getInstance().addCategory(newCat, new FirestoreCallback<Void>() {
+            @Override
+            public void onCallback(Void result) {
+                Toast.makeText(ManageCategoriesActivity.this, "Gespeichert", Toast.LENGTH_SHORT).show();
+                loadCategories(); // Liste neu laden!
+            }
 
-        db.collection("categories")
-                .add(newCat)
-                .addOnSuccessListener(doc -> {
-                    Toast.makeText(this, "Kategorie gespeichert!", Toast.LENGTH_SHORT).show();
-                    // Die Liste aktualisiert sich dank "SnapshotListener" automatisch!
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT).show();
-                });
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(ManageCategoriesActivity.this, "Fehler", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     private void showEditDialog(Category category) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -194,29 +171,38 @@ public class ManageCategoriesActivity extends AppCompatActivity {
 
         builder.setView(layout);
 
-        // SPEICHERN (Update) - Botton 1
+        //Update über Manager
         builder.setPositiveButton("Speichern", (dialog, which) -> {
             String limitStr = inputLimit.getText().toString().trim();
             double newLimit = 0;
             if (!limitStr.isEmpty()) {
                 try {
                     newLimit = Double.parseDouble(limitStr);
-                } catch (NumberFormatException e) {
-                    return; // Wenn Quatsch eingegeben wurde, mach nichts
-                }
+                } catch (NumberFormatException e) { return; }
             }
 
-            // In Firestore aktualisieren
-            db.collection("categories").document(category.getId())
-                    .update("limit", newLimit)
-                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Limit aktualisiert", Toast.LENGTH_SHORT).show());
+            FirestoreManager.getInstance().updateCategoryLimit(category.getId(), newLimit, new FirestoreCallback<Void>() {
+                @Override
+                public void onCallback(Void result) {
+                    Toast.makeText(ManageCategoriesActivity.this, "Aktualisiert", Toast.LENGTH_SHORT).show();
+                    loadCategories(); // Neu laden
+                }
+                @Override
+                public void onFailure(Exception e) { /* Fehler */ }
+            });
         });
-        // LÖSCHEN (Delete) -> Der "Neutrale" Knopf - Botton 2
+
+        // Löschen über Manager
         builder.setNeutralButton("Löschen", (dialog, which) -> {
-            // Firestore Befehl zum Löschen
-            db.collection("categories").document(category.getId())
-                    .delete()
-                    .addOnSuccessListener(aVoid -> Toast.makeText(this, "Kategorie gelöscht", Toast.LENGTH_SHORT).show());
+            FirestoreManager.getInstance().deleteCategory(category.getId(), new FirestoreCallback<Void>() {
+                @Override
+                public void onCallback(Void result) {
+                    Toast.makeText(ManageCategoriesActivity.this, "Gelöscht", Toast.LENGTH_SHORT).show();
+                    loadCategories(); // Neu laden
+                }
+                @Override
+                public void onFailure(Exception e) { /* Fehler */ }
+            });
         });
         // ABBRECHEN - Botton 3
         builder.setNegativeButton("Abbrechen", null);

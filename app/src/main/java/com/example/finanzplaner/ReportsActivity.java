@@ -112,6 +112,54 @@ public class ReportsActivity extends AppCompatActivity {
         int y = 140; // Start-Höhe für die erste Zeile
         paint.setColor(Color.BLACK);
         paint.setTextSize(12);
+
+        double totalSum = 0;
+        SimpleDateFormat dateFmt = new SimpleDateFormat("dd.MM.", Locale.GERMANY);
+
+        for (Transaction t : transactions) {
+            // Datum (Links)
+            String date = dateFmt.format(new Date(t.getTimestamp()));
+            canvas.drawText(date, 50, y, paint);
+
+            // Titel (Mitte)
+            // Titel wird gekürzt, falls er zu lang ist
+            String title = t.getTitle();
+            if (title.length() > 30) title = title.substring(0, 27) + "...";
+            canvas.drawText(title, 110, y, paint);
+
+            // Betrag (Rechtsbündig simulieren)
+            String amountStr = String.format(Locale.GERMANY, "%.2f €", t.getAmount());
+            if ("ausgabe".equals(t.getType())) {
+                paint.setColor(Color.RED);
+                totalSum -= t.getAmount();
+                amountStr = "- " + amountStr;
+            } else {
+                paint.setColor(Color.parseColor("#4CAF50")); // Grün
+                totalSum += t.getAmount();
+                amountStr = "+ " + amountStr;
+            }
+            canvas.drawText(amountStr, 450, y, paint);
+
+            // Farbe zurücksetzen für nächste Zeile
+            paint.setColor(Color.BLACK);
+            y += 25; // Zeilenabstand
+        }
+
+        // Gesamtsumme Strich & Ergebnis
+        y += 10;
+        paint.setColor(Color.BLACK);
+        canvas.drawLine(400, y, 545, y, paint); // Kleiner Strich über Summe
+        y += 25;
+
+        paint.setFakeBoldText(true);
+        canvas.drawText("Gesamt:", 350, y, paint);
+
+        String totalStr = String.format(Locale.GERMANY, "%.2f €", totalSum);
+        canvas.drawText(totalStr, 450, y, paint);
+
+        // Seite abschließen
+        document.finishPage(page);
+
     }
 
     private void setupBottomNavigation() {

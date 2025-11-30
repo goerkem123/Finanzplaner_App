@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -181,6 +183,15 @@ public class ReportsActivity extends AppCompatActivity {
     }
     // Hilfsmethode zum Teilen
     private void sharePdf(File file) {
+        //Nutzen des FileProvider --> im Manifest eingerichtet
+        Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("application/pdf");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        startActivity(Intent.createChooser(intent, "Bericht teilen via"));
     }
 
     private void setupBottomNavigation() {

@@ -89,6 +89,10 @@ public class ReportsActivity extends AppCompatActivity {
         android.graphics.Canvas canvas = page.getCanvas();
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
+        //Titel schreiben
+        paint.setTextSize(24);
+        paint.setFakeBoldText(true);
+        canvas.drawText("Monatsbericht", 50, 60, paint);
     }
 
     private void setupBottomNavigation() {

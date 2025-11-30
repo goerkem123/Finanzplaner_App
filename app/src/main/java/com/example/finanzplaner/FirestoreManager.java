@@ -80,4 +80,17 @@ public class FirestoreManager {
                 })
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
+    // Methode C: Transaktion löschen
+    // Wir nutzen Void als Typ, weil wir keine Daten zurückbekommen, nur "Erfolg" oder "Fehler"
+    public void deleteTransaction(String transactionId, FirestoreCallback<Void> callback) {
+        if (transactionId == null) {
+            callback.onFailure(new Exception("ID ist null"));
+            return;
+        }
+
+        db.collection("transactions").document(transactionId)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onCallback(null))
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
 }

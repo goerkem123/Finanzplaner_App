@@ -119,4 +119,11 @@ public class FirestoreManager {
                 .addOnSuccessListener(doc -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
+    // Methode F: Kategorie löschen
+    public void deleteCategory(String categoryId, FirestoreCallback<Void> callback) {
+        db.collection("categories").document(categoryId)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onCallback(null))
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
 }

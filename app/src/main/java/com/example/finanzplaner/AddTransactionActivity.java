@@ -169,6 +169,13 @@ public class AddTransactionActivity extends AppCompatActivity {
         // 1. Eingaben aus dem Design auslesen
         String amountStr = etAmount.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
+
+        // Safety Check für Spinner (falls Liste noch lädt)
+        if (spinnerCategory.getSelectedItem() == null) {
+            Toast.makeText(this, "Keine Kategorie gewählt", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String category = spinnerCategory.getSelectedItem().toString();
         boolean isRecurring = switchRecurring.isChecked();
 
@@ -208,18 +215,21 @@ public class AddTransactionActivity extends AppCompatActivity {
                 isRecurring
         );
 
-        // 5. Ab zu Firestore! In die Sammlung "transactions" speichern.
-        db.collection("transactions")
-                .add(newTransaction)
-                .addOnSuccessListener(documentReference -> {
-                    // ERFOLG!
-                    Toast.makeText(AddTransactionActivity.this, "Transaktion gespeichert!", Toast.LENGTH_SHORT).show();
-                    finish(); // Fenster schließen und zurück zum Dashboard
-                })
-                .addOnFailureListener(e -> {
-                    // FEHLER!
-                    Toast.makeText(AddTransactionActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    fabSave.setEnabled(true); // Button wieder aktivieren für neuen Versuch
-                });
+        // Anstatt db.collection(...).add(...) nutzen wir jetzt den Manager:
+        FirestoreManager.getInstance().saveTransaction(newTransaction, new FirestoreCallback<Void>() {
+            @Override
+            public void onCallback(Void result) {
+                // ERFOLG! (Code von deinem Freund übernommen)
+                Toast.makeText(AddTransactionActivity.this, "Transaktion gespeichert!", Toast.LENGTH_SHORT).show();
+                finish(); // Fenster schließen
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // FEHLER! (Code von deinem Freund übernommen)
+                Toast.makeText(AddTransactionActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                fabSave.setEnabled(true); // Button wieder aktivieren
+            }
+        });
     }
 }

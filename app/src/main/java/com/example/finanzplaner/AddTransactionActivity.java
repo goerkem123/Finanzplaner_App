@@ -27,7 +27,7 @@ import java.util.Locale;
 
 public class AddTransactionActivity extends AppCompatActivity {
 
-    // --- 1. Variablen für die Elemente aus dem Design deines Kumpels ---
+    // Variablen für die Elemente
     private Button btnIncome, btnExpense;
     private EditText etAmount, etDescription;
     private Spinner spinnerCategory;
@@ -36,11 +36,10 @@ public class AddTransactionActivity extends AppCompatActivity {
     private FloatingActionButton fabSave;
     private List<String> categoryNameList;
 
-    // --- 2. Firebase ---
+    // Firebase
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
 
-    // --- 3. Status-Variablen (zum Merken der Auswahl) ---
+    // Status-Variablen (zum Merken der Auswahl)
     private String selectedType = "ausgabe"; // Standard: Ausgabe ist aktiv
     private long selectedTimestamp; // Das ausgewählte Datum in Millisekunden
     private Calendar calendar; // Hilfsobjekt für das Datum
@@ -53,7 +52,6 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         // Firebase initialisieren
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         // Kalender vorbereiten (aktuelles Datum)
         calendar = Calendar.getInstance();
@@ -65,9 +63,11 @@ public class AddTransactionActivity extends AppCompatActivity {
         categoryNameList = new ArrayList<>();
         // --- 5. Die Logik für die Knöpfe einrichten ---
         setupTypeButtons();      // Einnahme/Ausgabe Klick-Logik
-        loadCategoriesFromFirestore();  // Kategorien in den Spinner laden
         setupDatePicker();       // Datumsauswahl-Dialog
         updateDateLabel();       // Das aktuelle Datum im Textfeld anzeigen
+
+        // Kategorien über Manager laden
+        loadCategoriesFromManager();
 
         // Der Speichern-Button (FAB)
         fabSave.setOnClickListener(v -> saveTransaction());
@@ -110,34 +110,27 @@ public class AddTransactionActivity extends AppCompatActivity {
         // Startzustand: Simuliere Klick auf "Ausgabe", damit es am Anfang aktiv ist
         btnExpense.performClick();
     }
+    // Laden über Manager
+    private void loadCategoriesFromManager() {
+        FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
+            @Override
+            public void onCallback(List<Category> result) {
+                categoryNameList.clear();
+                for (Category cat : result) {
+                    categoryNameList.add(cat.getName());
+                }
 
-    // Füllt den Kategorie-Spinner mit einer Liste
-    private void loadCategoriesFromFirestore() {
-        if (mAuth.getCurrentUser() == null) return;
+                if (categoryNameList.isEmpty()) categoryNameList.add("Allgemein");
 
-        db.collection("categories")
-                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
-                //.orderBy("name") // Sortiert alphabetisch (A-Z)
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    categoryNameList.clear(); // Liste leere
-// Alle gefundenen Kategorien in die Liste packen
-                    for (QueryDocumentSnapshot doc : snapshots) {
-                        Category cat = doc.toObject(Category.class);
-                        if (cat.getName() != null) {
-                            categoryNameList.add(cat.getName());
-                        }
-                    }
-                    // Fallback: Falls der Nutzer ALLES gelöscht hat
-                    if (categoryNameList.isEmpty()) categoryNameList.add("Allgemein");
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(AddTransactionActivity.this, android.R.layout.simple_spinner_dropdown_item, categoryNameList);
+                spinnerCategory.setAdapter(adapter);
+            }
 
-                    // Den Spinner mit den geladenen Daten füllen
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNameList);
-                    spinnerCategory.setAdapter(adapter);
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Kategorien konnten nicht geladen werden.", Toast.LENGTH_SHORT).show()
-                );
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(AddTransactionActivity.this, "Fehler beim Laden der Kategorien", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     // Die Logik für den Datums-Wähler
     private void setupDatePicker() {

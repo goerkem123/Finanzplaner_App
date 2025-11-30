@@ -16,9 +16,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ReportsActivity extends AppCompatActivity {
     private Button btnGenerate;
@@ -93,6 +96,12 @@ public class ReportsActivity extends AppCompatActivity {
         paint.setTextSize(24);
         paint.setFakeBoldText(true);
         canvas.drawText("Monatsbericht", 50, 60, paint);
+        // Datum unter den Titel
+        paint.setTextSize(14);
+        paint.setFakeBoldText(false);
+        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.GERMANY);
+        String currentMonth = sdf.format(new Date());
+        canvas.drawText("Zeitraum: " + currentMonth, 50, 85, paint);
     }
 
     private void setupBottomNavigation() {

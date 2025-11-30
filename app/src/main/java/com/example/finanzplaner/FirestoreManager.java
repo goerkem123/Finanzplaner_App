@@ -111,4 +111,12 @@ public class FirestoreManager {
                     callback.onFailure(e);
                 });
     }
+    // Methode E: Kategorie speichern
+    public void addCategory(Category category, FirestoreCallback<Void> callback) {
+        if (mAuth.getCurrentUser() == null) return;
+
+        db.collection("categories").add(category)
+                .addOnSuccessListener(doc -> callback.onCallback(null))
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
 }

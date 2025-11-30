@@ -1,7 +1,12 @@
 package com.example.finanzplaner;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FirestoreManager {
     // Es gibt NUR eine einzige Instanz (Singleton) → egal wie oft du FirestoreManager.getInstance() aufruft
@@ -23,5 +28,34 @@ public class FirestoreManager {
             instance = new FirestoreManager();
         }
         return instance;
+    }
+    // Methode A: Transaktionen laden (Sortiert nach Datum, neueste zuerst)
+    public void getTransactions(FirestoreCallback<List<Transaction>> callback) {
+        if (mAuth.getCurrentUser() == null) {
+            callback.onFailure(new Exception("User ist nicht eingeloggt"));
+            return;
+        }
+        String userId = mAuth.getCurrentUser().getUid();
+
+        db.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    List<Transaction> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshots) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) {
+                            t.setId(doc.getId()); // WICHTIG: Dokument-ID setzen für Lösch-Funktion
+                            list.add(t);
+                        }
+                    }
+                    // Erfolg: Liste zurückgeben
+                    callback.onCallback(list);
+                })
+                .addOnFailureListener(e -> {
+                    // Fehler weiterleiten
+                    callback.onFailure(e);
+                });
     }
 }

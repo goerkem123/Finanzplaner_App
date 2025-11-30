@@ -126,4 +126,11 @@ public class FirestoreManager {
                 .addOnSuccessListener(aVoid -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
+    // Methode G: Kategorie Limit aktualisieren
+    public void updateCategoryLimit(String categoryId, double newLimit, FirestoreCallback<Void> callback) {
+        db.collection("categories").document(categoryId)
+                .update("limit", newLimit)
+                .addOnSuccessListener(aVoid -> callback.onCallback(null))
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
 }

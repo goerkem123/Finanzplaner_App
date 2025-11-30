@@ -133,4 +133,30 @@ public class FirestoreManager {
                 .addOnSuccessListener(aVoid -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
+    // Methode H: Transaktionen ab einem bestimmten Datum laden (für PDF)
+    public void getTransactionsFromDate(long startDate, FirestoreCallback<List<Transaction>> callback) {
+        if (mAuth.getCurrentUser() == null) {
+            callback.onFailure(new Exception("Nicht eingeloggt"));
+            return;
+        }
+        String userId = mAuth.getCurrentUser().getUid();
+
+        db.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .whereGreaterThanOrEqualTo("timestamp", startDate)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    List<Transaction> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshots) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) {
+                            t.setId(doc.getId());
+                            list.add(t);
+                        }
+                    }
+                    callback.onCallback(list);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
+
 }

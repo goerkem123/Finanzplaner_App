@@ -1,6 +1,7 @@
 package com.example.finanzplaner;
 
 import android.content.Intent;
+import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -78,9 +79,10 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
     private void createPdf(List<Transaction> transactions) {
-        Toast.makeText(this, "Daten geladen: " + transactions.size() + " Einträge", Toast.LENGTH_SHORT).show();
-        btnGenerate.setEnabled(true);
-        btnGenerate.setText("PDF Erstellen & Teilen");
+        // 1. Dokument erstellen (A4 Größe: 595 x 842 Pixel)
+        PdfDocument document = new PdfDocument();
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
+        PdfDocument.Page page = document.startPage(pageInfo);
     }
 
     private void setupBottomNavigation() {

@@ -209,7 +209,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 amount,
                 selectedType,
                 category,
-                selectedTimestamp,
+                new java.util.Date(selectedTimestamp),
                 isRecurring
         );
 

@@ -134,7 +134,7 @@ public class FirestoreManager {
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
     // Methode H: Transaktionen ab einem bestimmten Datum laden (für PDF)
-    public void getTransactionsFromDate(long startDate, FirestoreCallback<List<Transaction>> callback) {
+    public void getTransactionsFromDate(java.util.Date startDate, FirestoreCallback<List<Transaction>> callback) {
         if (mAuth.getCurrentUser() == null) {
             callback.onFailure(new Exception("Nicht eingeloggt"));
             return;

@@ -150,6 +150,16 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void loadTransactionsAndCalculate(List<Category> categories) {
+        FirestoreManager.getInstance().getTransactions(new FirestoreCallback<List<Transaction>>() {
+            @Override
+            public void onCallback(List<Transaction> transactions) {
+                calculateAndShowData(categories, transactions);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                tvBalance.setText("Fehler");
+            }
+        });
     }
 
     private void calculateAndShowData(java.util.List<Category> categories, java.util.List<Transaction> transactions) {

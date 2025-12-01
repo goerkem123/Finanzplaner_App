@@ -5,6 +5,7 @@
     android:id="@+id/RegisterPanel"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#263238"
     android:gravity="center_horizontal">
 
     <TextView
@@ -12,6 +13,7 @@
         android:layout_width="143dp"
         android:layout_height="38dp"
         android:text="Registrieren"
+        android:textColor="#FDFDFD"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -24,9 +26,11 @@
         android:id="@+id/Benutzername"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
+        android:backgroundTint="#FDFDFD"
         android:ems="10"
+        android:hint="Benutzername"
         android:inputType="text"
-        android:text="Benutzername"
+        android:textColorHint="#FDFDFD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -38,9 +42,11 @@
         android:id="@+id/RegisterEmail"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
+        android:backgroundTint="#FDFDFD"
         android:ems="10"
         android:hint="E-Mail"
         android:inputType="textEmailAddress"
+        android:textColorHint="#FDFDFD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -53,9 +59,11 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginBottom="300dp"
+        android:backgroundTint="#FDFDFD"
         android:ems="10"
         android:hint="Passwort"
         android:inputType="textPassword"
+        android:textColorHint="#FDFDFD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -63,13 +71,21 @@
         app:layout_constraintTop_toBottomOf="@+id/RegisterEmail"
         app:layout_constraintVertical_bias="0.519" />
 
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="#FDFDFD" />
+
     <EditText
         android:id="@+id/RegisterPasswordConfirm"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
+        android:backgroundTint="#FDFDFD"
         android:ems="10"
         android:hint="Passwort bestätigen"
         android:inputType="textPassword"
+        android:textColorHint="#FDFDFD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -81,6 +97,7 @@
         android:id="@+id/button"
         android:layout_width="166dp"
         android:layout_height="62dp"
+        android:backgroundTint="#5E92F3"
         android:text="Registrieren"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -96,6 +113,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="44dp"
+        android:backgroundTint="#5E92F3"
         android:text="Zurück zum Login"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -107,14 +125,14 @@
 
     <TextView
         android:id="@+id/tvRegisterResult"
-        android:text=""
-        android:layout_marginTop="24dp"
-        android:textColor="@android:color/holo_green_dark"
-        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/BackToLogin"
+        android:layout_marginTop="24dp"
+        android:text=""
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="16sp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/BackToLogin" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

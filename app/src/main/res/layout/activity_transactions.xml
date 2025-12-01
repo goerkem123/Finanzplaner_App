@@ -41,6 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_marginTop="16dp"
+        android:backgroundTint="#FBFBFB"
         android:drawableEnd="@android:drawable/ic_menu_search"
         android:ems="10"
         android:hint="Suche..."

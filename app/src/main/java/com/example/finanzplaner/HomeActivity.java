@@ -21,7 +21,7 @@ public class HomeActivity extends AppCompatActivity {
     private ImageButton btnCategories;
     private FloatingActionButton fabAdd;
     private BudgetAdapter budgetAdapter;
-    private TextView tvBalance, tvIncome, tvExpense;
+    private TextView tvBalance, tvIncome, tvExpense, tvOverviewTitle;
     private androidx.recyclerview.widget.RecyclerView recyclerViewBudgets;
     private java.util.List<Category> categoryList;
 
@@ -45,6 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         tvBalance = findViewById(R.id.tv_balance);        // Gesamtsaldo
         tvIncome = findViewById(R.id.tv_income_amount);   // Einnahmen
         tvExpense = findViewById(R.id.tv_expense_amount); // Ausgaben
+        tvOverviewTitle = findViewById(R.id.tv_overview_title); //Tittel
 
         // RecyclerView einrichten
         recyclerViewBudgets = findViewById(R.id.recycler_view_budgets);
@@ -77,7 +78,8 @@ public class HomeActivity extends AppCompatActivity {
             Intent i = new Intent(this, AddTransactionActivity.class);
             startActivity(i);
         });
-
+        //Namen laden und setzen
+        loadUserName();
         // Navigation Logik
         setupBottomNavigation();
     }
@@ -117,6 +119,21 @@ public class HomeActivity extends AppCompatActivity {
             public void onCallback(Void result) {} // Erfolg, nix tun
             @Override
             public void onFailure(Exception e) {}
+        });
+    }
+    private void loadUserName() {
+        FirestoreManager.getInstance().getUserName(new FirestoreCallback<String>() {
+            @Override
+            public void onCallback(String name) {
+                // Wir setzen den Text: "Willkommen, Alex"
+                tvOverviewTitle.setText("Willkommen, " + name);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // Falls was schief geht, lassen wir "Übersicht" oder setzen einen Standard
+                tvOverviewTitle.setText("Willkommen");
+            }
         });
     }
 

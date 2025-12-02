@@ -29,7 +29,31 @@ public class FirestoreManager {
         }
         return instance;
     }
-    // Methode A: Transaktionen laden (Sortiert nach Datum, neueste zuerst)
+    // Methode A: Benutzernamen laden
+    public void getUserName(FirestoreCallback<String> callback) {
+        if (mAuth.getCurrentUser() == null) {
+            callback.onFailure(new Exception("Nicht eingeloggt"));
+            return;
+        }
+        String userId = mAuth.getCurrentUser().getUid();
+
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Der Name steht im Feld "username" (so hatten wir es beim Register gespeichert)
+                        String name = documentSnapshot.getString("username");
+                        if (name != null && !name.isEmpty()) {
+                            callback.onCallback(name);
+                        } else {
+                            callback.onCallback("Nutzer"); // Fallback
+                        }
+                    } else {
+                        callback.onCallback("Nutzer");
+                    }
+                })
+                .addOnFailureListener(e -> callback.onFailure(e));
+    }
+    // Methode B: Transaktionen laden (Sortiert nach Datum, neueste zuerst)
     public void getTransactions(FirestoreCallback<List<Transaction>> callback) {
         if (mAuth.getCurrentUser() == null) {
             callback.onFailure(new Exception("User ist nicht eingeloggt"));
@@ -58,7 +82,7 @@ public class FirestoreManager {
                     callback.onFailure(e);
                 });
     }
-    // Methode B: Kategorien laden (Alphabetisch sortiert)
+    // Methode C: Kategorien laden (Alphabetisch sortiert)
     public void getCategories(FirestoreCallback<List<Category>> callback) {
         if (mAuth.getCurrentUser() == null) return;
         String userId = mAuth.getCurrentUser().getUid();
@@ -80,7 +104,7 @@ public class FirestoreManager {
                 })
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
-    // Methode C: Transaktion löschen
+    // Methode D: Transaktion löschen
     // Wir nutzen Void als Typ, weil wir keine Daten zurückbekommen, nur "Erfolg" oder "Fehler"
     public void deleteTransaction(String transactionId, FirestoreCallback<Void> callback) {
         if (transactionId == null) {
@@ -93,7 +117,7 @@ public class FirestoreManager {
                 .addOnSuccessListener(aVoid -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
-    // Methode D: Neue Transaktion speichern
+    // Methode E: Neue Transaktion speichern
     public void saveTransaction(Transaction transaction, FirestoreCallback<Void> callback) {
         if (mAuth.getCurrentUser() == null) {
             callback.onFailure(new Exception("Nicht eingeloggt"));
@@ -111,7 +135,7 @@ public class FirestoreManager {
                     callback.onFailure(e);
                 });
     }
-    // Methode E: Kategorie speichern
+    // Methode F: Kategorie speichern
     public void addCategory(Category category, FirestoreCallback<Void> callback) {
         if (mAuth.getCurrentUser() == null) return;
 
@@ -119,21 +143,21 @@ public class FirestoreManager {
                 .addOnSuccessListener(doc -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
-    // Methode F: Kategorie löschen
+    // Methode G: Kategorie löschen
     public void deleteCategory(String categoryId, FirestoreCallback<Void> callback) {
         db.collection("categories").document(categoryId)
                 .delete()
                 .addOnSuccessListener(aVoid -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
-    // Methode G: Kategorie Limit aktualisieren
+    // Methode H: Kategorie Limit aktualisieren
     public void updateCategoryLimit(String categoryId, double newLimit, FirestoreCallback<Void> callback) {
         db.collection("categories").document(categoryId)
                 .update("limit", newLimit)
                 .addOnSuccessListener(aVoid -> callback.onCallback(null))
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
-    // Methode H: Transaktionen ab einem bestimmten Datum laden (für PDF)
+    // Methode I: Transaktionen ab einem bestimmten Datum laden (für PDF)
     public void getTransactionsFromDate(java.util.Date startDate, FirestoreCallback<List<Transaction>> callback) {
         if (mAuth.getCurrentUser() == null) {
             callback.onFailure(new Exception("Nicht eingeloggt"));

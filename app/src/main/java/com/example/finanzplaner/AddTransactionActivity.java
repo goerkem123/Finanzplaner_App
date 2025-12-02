@@ -120,9 +120,14 @@ public class AddTransactionActivity extends AppCompatActivity {
 
                 if (categoryNameList.isEmpty()) categoryNameList.add("Allgemein");
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(AddTransactionActivity.this, android.R.layout.simple_spinner_dropdown_item, categoryNameList);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                        AddTransactionActivity.this,
+                        R.layout.item_spinner,
+                        categoryNameList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerCategory.setAdapter(adapter);
             }
+
 
             @Override
             public void onFailure(Exception e) {

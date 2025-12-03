@@ -58,7 +58,7 @@
         android:id="@+id/spinner_filter_category"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_margin="16dp"
+        android:layout_margin="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:backgroundTint="#FDFDFD"

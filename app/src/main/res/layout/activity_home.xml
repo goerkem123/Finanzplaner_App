@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="34dp"
-        android:text=" Übersicht"
+        android:text="Willkommen..."
         android:textColor="#FDFDFD"
         android:textSize="20sp"
         android:textStyle="bold"

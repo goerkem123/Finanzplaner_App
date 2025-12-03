@@ -6,6 +6,5 @@
     android:ellipsize="end"
     android:gravity="center_vertical"
     android:singleLine="true"
-    android:text="Willkommen..."
     android:textColor="#FDFDFD"
     android:textSize="20sp" />

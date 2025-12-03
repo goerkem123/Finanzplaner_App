@@ -55,10 +55,9 @@ public class ReportsActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_MONTH, 1);
         cal.set(Calendar.HOUR_OF_DAY, 0);
-        long startOfMonth = cal.getTimeInMillis();
 
         //Laden über den Manager
-        FirestoreManager.getInstance().getTransactionsFromDate(startOfMonth, new FirestoreCallback<List<Transaction>>() {
+        FirestoreManager.getInstance().getTransactionsFromDate(cal.getTime(), new FirestoreCallback<List<Transaction>>() {
             @Override
             public void onCallback(List<Transaction> transactions) {
                 if (transactions.isEmpty()) {
@@ -116,8 +115,10 @@ public class ReportsActivity extends AppCompatActivity {
 
         for (Transaction t : transactions) {
             // Datum (Links)
-            String date = dateFmt.format(new Date(t.getTimestamp()));
-            canvas.drawText(date, 50, y, paint);
+            if (t.getTimestamp() != null) {
+                String date = dateFmt.format(t.getTimestamp());
+                canvas.drawText(date, 50, y, paint);
+            }
 
             // Titel (Mitte)
             // Titel wird gekürzt, falls er zu lang ist

@@ -47,7 +47,10 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         categoryObjectList = new ArrayList<>();
 
         // 4. Adapter erstellen (Standard Android Layout für Listen)
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
+        adapter = new ArrayAdapter<>(
+                this,
+                R.layout.item_category_list,
+                displayList);
         listView.setAdapter(adapter);
 
         // 5. Daten laden starten

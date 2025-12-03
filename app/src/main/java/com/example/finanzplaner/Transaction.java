@@ -2,6 +2,8 @@ package com.example.finanzplaner;
 
 // Diese Klasse ist der Bauplan für eine einzelne Transaktion.
 // Firestore kann Objekte dieser Klasse direkt speichern und laden.
+import com.google.firebase.firestore.ServerTimestamp;
+import java.util.Date;
 public class Transaction {
 
     // Die Eigenschaften einer Transaktion
@@ -11,7 +13,8 @@ public class Transaction {
     private double amount;      // Der Betrag (z.B. 12.50)
     private String type;        // "einnahme" oder "ausgabe"
     private String category;    // z.B. "Lebensmittel", "Miete"
-    private long timestamp;     // 🔥 WIEDER DA: Zeitpunkt der Erstellung (in Millisekunden)
+    @ServerTimestamp // Das sagt Firebase: "Wenn null, nimm Serverzeit"
+    private Date timestamp;
     private boolean isRecurring; // Ist es eine wiederkehrende Buchung?
 
     // 1. WICHTIG: Leerer Konstruktor (wird von Firestore benötigt!)
@@ -20,14 +23,14 @@ public class Transaction {
     }
 
     // 2. Voller Konstruktor (aktualisiert mit timestamp UND isRecurring)
-    public Transaction(String userId, String title, double amount, String type, String category, long timestamp, boolean isRecurring) {
+    public Transaction(String userId, String title, double amount, String type, String category, Date timestamp, boolean isRecurring) {
         // ID wird erst später gesetzt, wenn wir speichern
         this.userId = userId;
         this.title = title;
         this.amount = amount;
         this.type = type;
         this.category = category;
-        this.timestamp = timestamp; // 🔥 WIEDER DA
+        this.timestamp = timestamp;
 
         this.isRecurring = isRecurring;
     }
@@ -52,9 +55,9 @@ public class Transaction {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    // 🔥 WIEDER DA: Getter/Setter für das Datum
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public Date getTimestamp() { return timestamp; }
+    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 
     public boolean isRecurring() { return isRecurring; }
     public void setRecurring(boolean recurring) { isRecurring = recurring; }

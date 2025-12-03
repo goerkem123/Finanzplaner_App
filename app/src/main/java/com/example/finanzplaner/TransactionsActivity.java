@@ -70,7 +70,11 @@ public class TransactionsActivity extends AppCompatActivity {
                 for (Category c : result) {
                     categoryList.add(c.getName());
                 }
-                ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(TransactionsActivity.this, android.R.layout.simple_spinner_dropdown_item, categoryList);
+                ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                        TransactionsActivity.this,
+                        R.layout.item_spinner,
+                        categoryList);
+                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerCategory.setAdapter(spinnerAdapter);
             }
 

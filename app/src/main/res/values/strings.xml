@@ -1,3 +1,3 @@
 <resources>
-    <string name="Finanzplaner">My Application</string>
+    <string name="app_name">Finanzplaner</string>
 </resources>

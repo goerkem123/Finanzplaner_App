@@ -54,9 +54,13 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             // Suche im Titel
             boolean matchesTitle = t.getTitle().toLowerCase().contains(lowerCaseQuery);
 
-            // Suche im Datum (Timestamp in Text umwandeln: "27.11.2025")
-            String dateStr = sdf.format(new Date(t.getTimestamp()));
-            boolean matchesDate = dateStr.contains(lowerCaseQuery);
+            // Suche im Datum
+            boolean matchesDate = false;
+            if (t.getTimestamp() != null) {
+                // KORREKTUR: Direkt das Date-Objekt nutzen, kein "new Date()" mehr!
+                String dateStr = sdf.format(t.getTimestamp());
+                matchesDate = dateStr.contains(lowerCaseQuery);
+            }
 
             // Treffer, wenn Titel ODER Datum passt
             matchesSearch = matchesTitle || matchesDate;
@@ -89,9 +93,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
         // Datum formatieren (von Millisekunden zu "27.11.2023")
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
-        String dateStr = sdf.format(new Date(t.getTimestamp()));
-
-        holder.tvDateCat.setText(dateStr + " • " + t.getCategory());
+        if (t.getTimestamp() != null) {
+            String dateStr = sdf.format(t.getTimestamp()); // Direkt reinwerfen!
+            holder.tvDateCat.setText(dateStr + " • " + t.getCategory());
+        } else {
+            holder.tvDateCat.setText("Datum unbekannt • " + t.getCategory());
+        }
 
         // Betrag formatieren (z.B. "12,50 €")
         String amountStr = String.format(Locale.GERMANY, "%.2f €", t.getAmount());

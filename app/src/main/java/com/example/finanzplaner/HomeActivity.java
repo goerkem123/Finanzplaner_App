@@ -126,7 +126,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onCallback(String name) {
                 // Wir setzen den Text: "Willkommen, Alex"
-                tvOverviewTitle.setText("Willkommen, " + name);
+                tvOverviewTitle.setText("Willkommen, " + name + "!");
             }
 
             @Override

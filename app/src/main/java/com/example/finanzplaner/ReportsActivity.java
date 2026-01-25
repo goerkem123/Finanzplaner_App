@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class ReportsActivity extends AppCompatActivity {
-    private Button btnGenerate;
+    private Button btnGenerate, btnPrevMonth, btnNextMonth;
+    private android.widget.TextView tvSelectedMonth;
     private FirebaseAuth mAuth;
+    private Calendar selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,34 +40,64 @@ public class ReportsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reports);
 
         mAuth = FirebaseAuth.getInstance();
-        btnGenerate = findViewById(R.id.btn_generate_pdf);
+        selectedDate = Calendar.getInstance();
 
+        initViews(); // UI initialisieren
         setupBottomNavigation();
+        updateMonthDisplay();// Text (z.B. "Januar 2026") anzeigen
+    }
+    private void initViews() {
+        btnGenerate = findViewById(R.id.btn_generate_pdf);
+        btnPrevMonth = findViewById(R.id.btn_prev_month);
+        btnNextMonth = findViewById(R.id.btn_next_month);
+        tvSelectedMonth = findViewById(R.id.tv_selected_month);
 
         btnGenerate.setOnClickListener(v -> loadDataAndCreatePdf());
-    }
 
+        // Klick auf "<" (Einen Monat zurück)
+        btnPrevMonth.setOnClickListener(v -> {
+            selectedDate.add(Calendar.MONTH, -1);
+            updateMonthDisplay();
+        });
+
+        // Klick auf ">" (Einen Monat vor)
+        btnNextMonth.setOnClickListener(v -> {
+            selectedDate.add(Calendar.MONTH, 1);
+            updateMonthDisplay();
+        });
+    }
+    private void updateMonthDisplay() {
+        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.GERMANY);
+        tvSelectedMonth.setText(sdf.format(selectedDate.getTime()));
+    }
     private void loadDataAndCreatePdf() {
         if (mAuth.getCurrentUser() == null) return;
 
         btnGenerate.setEnabled(false); // Button sperren
         btnGenerate.setText("Lade Daten...");
 
-        // Wir wollen nur den aktuellen Monat
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
+        // 1. Startdatum des gewählten Monats setzen (1. Tag 00:00 Uhr)
+        Calendar startOfMonth = (Calendar) selectedDate.clone();
+        startOfMonth.set(Calendar.DAY_OF_MONTH, 1);
+        startOfMonth.set(Calendar.HOUR_OF_DAY, 0);
+        startOfMonth.set(Calendar.MINUTE, 0);
+        startOfMonth.set(Calendar.SECOND, 0);
+        startOfMonth.set(Calendar.MILLISECOND, 0);
 
         //Laden über den Manager
-        FirestoreManager.getInstance().getTransactionsFromDate(cal.getTime(), new FirestoreCallback<List<Transaction>>() {
+        FirestoreManager.getInstance().getTransactionsFromDate(startOfMonth.getTime(), new FirestoreCallback<List<Transaction>>() {
             @Override
             public void onCallback(List<Transaction> transactions) {
-                if (transactions.isEmpty()) {
-                    Toast.makeText(ReportsActivity.this, "Keine Daten für diesen Monat!", Toast.LENGTH_SHORT).show();
+                // Filtern! Da Firestore evtl. auch Daten aus der Zukunft holt (falls vorhanden)
+                // oder wir sicherstellen wollen, dass wir nicht im nächsten Monat landen.
+                List<Transaction> filteredList = filterTransactionsForMonth(transactions, startOfMonth);
+
+                if (filteredList.isEmpty()) {
+                    Toast.makeText(ReportsActivity.this, "Keine Daten für " + tvSelectedMonth.getText(), Toast.LENGTH_SHORT).show();
                     resetButton();
                     return;
                 }
-                createPdf(transactions);
+                createPdf(filteredList);
             }
 
             @Override
@@ -74,6 +106,23 @@ public class ReportsActivity extends AppCompatActivity {
                 resetButton();
             }
         });
+    }
+    private List<Transaction> filterTransactionsForMonth(List<Transaction> all, Calendar monthCal) {
+        List<Transaction> result = new ArrayList<>();
+        int targetMonth = monthCal.get(Calendar.MONTH);
+        int targetYear = monthCal.get(Calendar.YEAR);
+
+        Calendar tCal = Calendar.getInstance();
+        for (Transaction t : all) {
+            if (t.getTimestamp() != null) {
+                tCal.setTime(t.getTimestamp());
+                // Prüfen ob Monat und Jahr übereinstimmen
+                if (tCal.get(Calendar.MONTH) == targetMonth && tCal.get(Calendar.YEAR) == targetYear) {
+                    result.add(t);
+                }
+            }
+        }
+        return result;
     }
     private void resetButton() {
         btnGenerate.setEnabled(true);
@@ -97,8 +146,8 @@ public class ReportsActivity extends AppCompatActivity {
         paint.setTextSize(14);
         paint.setFakeBoldText(false);
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.GERMANY);
-        String currentMonth = sdf.format(new Date());
-        canvas.drawText("Zeitraum: " + currentMonth, 50, 85, paint);
+        String reportMonth = sdf.format(selectedDate.getTime());
+        canvas.drawText("Zeitraum: " + reportMonth, 50, 85, paint);
         // Linie ziehen
         paint.setColor(Color.LTGRAY);
         paint.setStrokeWidth(2);

@@ -11,6 +11,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
+import android.content.SharedPreferences;
+import java.util.Calendar;
+import java.util.Date;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -84,12 +90,70 @@ public class HomeActivity extends AppCompatActivity {
         setupBottomNavigation();
     }
 
+    // Logik für wiederkehrende Buchungen
+    private void checkRecurringTransactions() {
+        if (mAuth.getCurrentUser() == null) return;
+
+        SharedPreferences prefs = getSharedPreferences("FinanzPlanerPrefs", MODE_PRIVATE);
+        long lastCheckMs = prefs.getLong("last_recurring_check", 0);
+
+        Calendar today = Calendar.getInstance();
+        int currentMonth = today.get(Calendar.MONTH);
+
+        Calendar lastCheckDate = Calendar.getInstance();
+        lastCheckDate.setTimeInMillis(lastCheckMs);
+        int lastCheckMonth = lastCheckDate.get(Calendar.MONTH);
+
+        if (lastCheckMs != 0 && currentMonth == lastCheckMonth) {
+            return;
+        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("transactions")
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
+                .whereEqualTo("recurring", true)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        prefs.edit().putLong("last_recurring_check", System.currentTimeMillis()).apply();
+                        return;
+                    }
+
+                    int count = 0;
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        Transaction original = doc.toObject(Transaction.class);
+                        if (original == null) continue;
+
+                        Transaction newTrans = new Transaction(
+                                original.getUserId(),
+                                original.getTitle(),
+                                original.getAmount(),
+                                original.getType(),
+                                original.getCategory(),
+                                new Date(), // Datum von HEUTE
+                                true
+                        );
+
+                        db.collection("transactions").add(newTrans);
+                        count++;
+                    }
+
+                    prefs.edit().putLong("last_recurring_check", System.currentTimeMillis()).apply();
+
+                    if (count > 0) {
+                        android.widget.Toast.makeText(this, count + " Abos wurden automatisch gebucht!", android.widget.Toast.LENGTH_LONG).show();
+                        loadFinancialData();
+                    }
+                });
+    }
+
     // Diese Methode wird immer aufgerufen, wenn der Bildschirm (wieder) sichtbar wird.
     // Perfekt, um die Daten neu zu laden, wenn man z.B. vom "Hinzufügen"-Screen zurückkommt.
     @Override
     protected void onResume() {
         super.onResume();
         loadFinancialData();
+        checkRecurringTransactions();
     }
     // Standard-Kategorien erstellen
     private void checkAndCreateDefaultCategories() {

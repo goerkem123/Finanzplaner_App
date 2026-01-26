@@ -7,6 +7,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.EditText;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -23,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     // View-Referenzen
     private EditText etemail, etpassword;
     private Button btnlogin, btnGoToRegister;
-    private TextView tvLoginResult;
+    private TextView tvLoginResult, tvForgotPassword;
 
     private FirebaseAuth mAuth;
 
@@ -40,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         btnlogin = findViewById(R.id.login);
         btnGoToRegister = findViewById(R.id.GoToRegister);
         tvLoginResult = findViewById(R.id.tvLoginResult);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
 // 2) Login-Klick
         btnlogin.setOnClickListener(v -> {
@@ -85,6 +90,44 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "E-Mail oder Passwort falsch", Toast.LENGTH_LONG).show();
                         }
                     });
+        });
+
+        // LOGIK FÜR PASSWORT VERGESSEN
+        tvForgotPassword.setOnClickListener(v -> {
+            // Ein Eingabefeld für die E-Mail erstellen
+            EditText resetMail = new EditText(v.getContext());
+
+            // Ein Dialog-Fenster bauen
+            AlertDialog.Builder passwordResetDialog = new AlertDialog.Builder(v.getContext());
+            passwordResetDialog.setTitle("Passwort zurücksetzen?");
+            passwordResetDialog.setMessage("Gib deine E-Mail ein, um den Link zu erhalten.");
+            passwordResetDialog.setView(resetMail);
+
+            // "Senden" Button im Dialog
+            passwordResetDialog.setPositiveButton("Senden", (dialog, which) -> {
+                // E-Mail aus dem Feld holen
+                String mail = resetMail.getText().toString().trim();
+
+                if (mail.isEmpty()) {
+                    Toast.makeText(LoginActivity.this, "Bitte E-Mail eingeben", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // FIREBASE BEFEHL: Reset-Mail senden
+                mAuth.sendPasswordResetEmail(mail).addOnSuccessListener(unused -> {
+                    Toast.makeText(LoginActivity.this, "Reset-Link wurde gesendet! Prüfe deine Mails.", Toast.LENGTH_LONG).show();
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(LoginActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            });
+
+            // "Abbrechen" Button im Dialog
+            passwordResetDialog.setNegativeButton("Abbrechen", (dialog, which) -> {
+                // Fenster einfach schließen
+            });
+
+            // Dialog anzeigen
+            passwordResetDialog.create().show();
         });
 
         // 3) Zur Registrierung navigieren

@@ -7,10 +7,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.widget.EditText;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -93,41 +89,9 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // LOGIK FÜR PASSWORT VERGESSEN
+
         tvForgotPassword.setOnClickListener(v -> {
-            // Ein Eingabefeld für die E-Mail erstellen
-            EditText resetMail = new EditText(v.getContext());
-
-            // Ein Dialog-Fenster bauen
-            AlertDialog.Builder passwordResetDialog = new AlertDialog.Builder(v.getContext());
-            passwordResetDialog.setTitle("Passwort zurücksetzen?");
-            passwordResetDialog.setMessage("Gib deine E-Mail ein, um den Link zu erhalten.");
-            passwordResetDialog.setView(resetMail);
-
-            // "Senden" Button im Dialog
-            passwordResetDialog.setPositiveButton("Senden", (dialog, which) -> {
-                // E-Mail aus dem Feld holen
-                String mail = resetMail.getText().toString().trim();
-
-                if (mail.isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Bitte E-Mail eingeben", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // FIREBASE BEFEHL: Reset-Mail senden
-                mAuth.sendPasswordResetEmail(mail).addOnSuccessListener(unused -> {
-                    Toast.makeText(LoginActivity.this, "Reset-Link wurde gesendet! Prüfe deine Mails.", Toast.LENGTH_LONG).show();
-                }).addOnFailureListener(e -> {
-                    Toast.makeText(LoginActivity.this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-            });
-
-            // "Abbrechen" Button im Dialog
-            passwordResetDialog.setNegativeButton("Abbrechen", (dialog, which) -> {
-                // Fenster einfach schließen
-            });
-
-            // Dialog anzeigen
-            passwordResetDialog.create().show();
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
 
         // 3) Zur Registrierung navigieren

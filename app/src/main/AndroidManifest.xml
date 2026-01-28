@@ -29,6 +29,7 @@
         <activity android:name=".DiagrammeActivity" />
         <activity android:name=".ReportsActivity" />
         <activity android:name=".AddTransactionActivity" />
+        <activity android:name=".ForgotPasswordActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

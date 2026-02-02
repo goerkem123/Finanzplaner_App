@@ -20,6 +20,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
@@ -198,12 +200,12 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void calculateAndShowData(java.util.List<Category> categories, java.util.List<Transaction> transactions) {
+    private void calculateAndShowData(List<Category> categories, List<Transaction> transactions) {
         double totalIncome = 0;
         double totalExpense = 0;
 
         // Map für Ausgaben pro Kategorie-Name zu zählen
-        java.util.Map<String, Double> categorySpendingMap = new java.util.HashMap<>();
+       Map<String, Double> categorySpendingMap = new HashMap<>();
 
         // Alle Transaktionen durchgehen und Summen bilden
         for (Transaction t : transactions) {

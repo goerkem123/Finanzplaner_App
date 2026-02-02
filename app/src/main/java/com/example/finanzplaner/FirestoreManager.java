@@ -194,5 +194,67 @@ public class FirestoreManager {
                 })
                 .addOnFailureListener(e -> callback.onFailure(e));
     }
+    // Methode J: Wiederkehrende Buchungen prüfen
+    // Wir brauchen 'Context' für SharedPreferences und geben einen Integer (Anzahl neuer Buchungen) zurück
+    public void checkRecurringTransactions(android.content.Context context, FirestoreCallback<Integer> callback) {
+        String userId = requireUserId(null); // Callback ist null, da wir hier keine UI-Fehler werfen wollen
+        if (userId == null) return;
+
+        android.content.SharedPreferences prefs = context.getSharedPreferences("FinanzPlanerPrefs", android.content.Context.MODE_PRIVATE);
+        long lastCheckMs = prefs.getLong("last_recurring_check", 0);
+
+        java.util.Calendar today = java.util.Calendar.getInstance();
+        int currentMonth = today.get(java.util.Calendar.MONTH);
+
+        java.util.Calendar lastCheckDate = java.util.Calendar.getInstance();
+        lastCheckDate.setTimeInMillis(lastCheckMs);
+        int lastCheckMonth = lastCheckDate.get(java.util.Calendar.MONTH);
+
+        // Wenn wir diesen Monat schon geprüft haben -> Abbrechen (0 neue Buchungen)
+        if (lastCheckMs != 0 && currentMonth == lastCheckMonth) {
+            if (callback != null) callback.onCallback(0);
+            return;
+        }
+
+        db.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("recurring", true)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        prefs.edit().putLong("last_recurring_check", System.currentTimeMillis()).apply();
+                        if (callback != null) callback.onCallback(0);
+                        return;
+                    }
+
+                    int count = 0;
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        Transaction original = doc.toObject(Transaction.class);
+                        if (original == null) continue;
+
+                        Transaction newTrans = new Transaction(
+                                original.getUserId(),
+                                original.getTitle(),
+                                original.getAmount(),
+                                original.getType(),
+                                original.getCategory(),
+                                new java.util.Date(), // Datum von HEUTE
+                                true
+                        );
+
+                        db.collection("transactions").add(newTrans);
+                        count++;
+                    }
+
+                    // Zeitstempel aktualisieren
+                    prefs.edit().putLong("last_recurring_check", System.currentTimeMillis()).apply();
+
+                    // Der Activity Bescheid sagen, wie viele Buchungen erstellt wurden
+                    if (callback != null) callback.onCallback(count);
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
+    }
 
 }

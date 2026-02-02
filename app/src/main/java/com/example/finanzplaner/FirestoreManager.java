@@ -239,7 +239,7 @@ public class FirestoreManager {
                                 original.getType(),
                                 original.getCategory(),
                                 new java.util.Date(), // Datum von HEUTE
-                                true
+                                false
                         );
 
                         db.collection("transactions").add(newTrans);

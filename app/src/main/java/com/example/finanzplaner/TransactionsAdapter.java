@@ -20,23 +20,25 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     private List<Transaction> allTransactions;
     private List<Transaction> displayedTransactions;
     private OnTransactionLongClickListener onLongClickListener;
-    public interface OnTransactionLongClickListener {
+    public interface OnTransactionLongClickListener { //Definiert, dass beim Klick das Daten-Paket (Transaction) mitgeschickt wird.
         void onTransactionLongClick(Transaction transaction);
     }
+
+    // Hier klinkt sich die Activity ein, um die Klick-Nachrichten zu empfangen.
     public void setOnTransactionLongClickListener(OnTransactionLongClickListener listener) {
         this.onLongClickListener = listener;
     }
 
-    public TransactionsAdapter(List<Transaction> transactionList) {
-        this.allTransactions = new ArrayList<>(transactionList);
-        this.displayedTransactions = transactionList;
+    public TransactionsAdapter(List<Transaction> transactionList) { // Startschuss für den Adapter. Der Konstruktor läuft genau einmal, wenn der Adapter erstellt wird
+        this.allTransactions = new ArrayList<>(transactionList); // Wir klonen die Liste, damit wir beim Filtern immer alle Originaldaten behalten
+        this.displayedTransactions = transactionList; // Das ist die Liste, die tatsächlich angezeigt wird
     }
-    public void updateData(List<Transaction> newList) {
+    public void updateData(List<Transaction> newList) { // Ersetzt alle alten Daten mit der neuen Liste aus der Datenbank
         this.allTransactions = new ArrayList<>(newList);
         this.displayedTransactions = newList;
         notifyDataSetChanged();
     }
-    public void filter(String query, String category) {
+    public void filter(String query, String category) { // Durchsucht das Backup (allTransactions) nach Suchtext UND Kategorie.
         List<Transaction> filteredList = new ArrayList<>();
 
         String lowerCaseQuery = query.toLowerCase().trim();
@@ -86,11 +88,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) { //Hier befüllen wir die leeren Zeilen mit den tatsächlichen Daten
         Transaction t = displayedTransactions.get(position);
 
         holder.tvTitle.setText(t.getTitle());
 
+        // In diesem Block kümmern wir uns um die Benutzerfreundlichkeit
         // Datum formatieren (von Millisekunden zu "27.11.2023")
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
         if (t.getTimestamp() != null) {
@@ -119,6 +122,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         });
     }
 
+    // Mit getItemCount teilen wir dem RecyclerView mit, wie viele Elemente er darstellen soll.
     @Override
     public int getItemCount() {
         return displayedTransactions.size();

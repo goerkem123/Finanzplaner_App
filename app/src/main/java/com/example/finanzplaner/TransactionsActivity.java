@@ -26,9 +26,9 @@ public class TransactionsActivity extends AppCompatActivity {
 
     // UI Elemente
     private EditText etSearch;
-    private Spinner spinnerCategory;
-    private RecyclerView recyclerView;
-    private BottomNavigationView bottomNav;
+    private Spinner spinnerCategory; // Das Dropdown-Menü
+    private RecyclerView recyclerView; // Die Liste: Der sichtbare Rahmen
+    private BottomNavigationView bottomNav; // verbindet die Daten mit dem Design
 
     // Logik
     private TransactionsAdapter adapter;
@@ -99,7 +99,7 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this)); // vertikale Anordnung von oben nach unten
         transactionList = new ArrayList<>();
         // Leere Liste übergeben, Daten kommen später
         adapter = new TransactionsAdapter(transactionList);

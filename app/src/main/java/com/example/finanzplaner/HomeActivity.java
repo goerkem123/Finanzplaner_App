@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Locale;
@@ -33,7 +34,7 @@ public class HomeActivity extends AppCompatActivity {
     private BudgetAdapter budgetAdapter;
     private TextView tvBalance, tvIncome, tvExpense, tvOverviewTitle;
     private androidx.recyclerview.widget.RecyclerView recyclerViewBudgets;
-    private java.util.List<Category> categoryList;
+    private List<Category> categoryList;
 
     // Firebase
     private FirebaseAuth mAuth;
@@ -63,7 +64,7 @@ public class HomeActivity extends AppCompatActivity {
         recyclerViewBudgets.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
 
         // Leere Liste erstellen und Adapter verbinden
-        categoryList = new java.util.ArrayList<>();
+        categoryList = new ArrayList<>();
         budgetAdapter = new BudgetAdapter(categoryList);
         recyclerViewBudgets.setAdapter(budgetAdapter);
 

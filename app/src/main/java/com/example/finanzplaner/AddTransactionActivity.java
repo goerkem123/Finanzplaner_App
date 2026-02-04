@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
+// Activity zum Erstellen neuer Einnahmen oder Ausgaben.
 public class AddTransactionActivity extends AppCompatActivity {
 
     // Variablen für die Elemente
@@ -45,7 +45,6 @@ public class AddTransactionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // WICHTIG: Hier wird das Design deines Kumpels geladen!
         setContentView(R.layout.activity_add_transaction);
 
         // Firebase initialisieren
@@ -55,11 +54,11 @@ public class AddTransactionActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
         selectedTimestamp = calendar.getTimeInMillis();
 
-        // --- 4. Die Java-Variablen mit den IDs aus dem XML-Design verbinden ---
+        // Die Java-Variablen mit den IDs aus dem XML-Design verbinden
         initViews();
 
         categoryNameList = new ArrayList<>();
-        // --- 5. Die Logik für die Knöpfe einrichten ---
+        // Die Logik für die Knöpfe einrichten
         setupTypeButtons();      // Einnahme/Ausgabe Klick-Logik
         setupDatePicker();       // Datumsauswahl-Dialog
         updateDateLabel();       // Das aktuelle Datum im Textfeld anzeigen
@@ -71,10 +70,8 @@ public class AddTransactionActivity extends AppCompatActivity {
         fabSave.setOnClickListener(v -> saveTransaction());
     }
 
-    // ==================================================================================
-    // HILFSMETHODEN (Machen den Code übersichtlicher)
-    // ==================================================================================
 
+    // HILFSMETHODEN
     // Verbindet die Variablen oben mit den IDs aus der XML-Datei
     private void initViews() {
         btnIncome = findViewById(R.id.btn_income);
@@ -108,7 +105,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         // Startzustand: Simuliere Klick auf "Ausgabe", damit es am Anfang aktiv ist
         btnExpense.performClick();
     }
-    // Laden über Manager
+    // Lädt Kategorien aus Firestore, um den Spinner (Dropdown) zu füllen.
     private void loadCategoriesFromManager() {
         FirestoreManager.getInstance().getCategories(new FirestoreCallback<List<Category>>() {
             @Override
@@ -117,9 +114,9 @@ public class AddTransactionActivity extends AppCompatActivity {
                 for (Category cat : result) {
                     categoryNameList.add(cat.getName());
                 }
-
+                // Fallback, falls keine Kategorien existieren
                 if (categoryNameList.isEmpty()) categoryNameList.add("Allgemein");
-
+                // Adapter verbindet Datenliste mit dem Spinner-View
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(
                         AddTransactionActivity.this,
                         R.layout.item_spinner,
@@ -135,7 +132,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             }
         });
     }
-    // Die Logik für den Datums-Wähler
+    // Öffnet den Android-Standard-Datumsdialog.
     private void setupDatePicker() {
         // Was passiert, wenn ein Datum ausgewählt wird?
         DatePickerDialog.OnDateSetListener dateSetListener = (view, year, month, dayOfMonth) -> {
@@ -164,10 +161,9 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
 
-    // ==================================================================================
-    // HAUPTLOGIK: SPEICHERN IN FIREBASE
-    // ==================================================================================
 
+    // HAUPTLOGIK: SPEICHERN IN FIREBASE
+    // Validiert Eingaben und speichert via FirestoreManager.
     private void saveTransaction() {
         // 1. Eingaben aus dem Design auslesen
         String amountStr = etAmount.getText().toString().trim();
@@ -207,7 +203,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         Toast.makeText(this, "Speichere...", Toast.LENGTH_SHORT).show();
         fabSave.setEnabled(false);
 
-        // 4. Das Transaction-Objekt erstellen (unser "Bauplan")
+        // 4. Das Transaction-Objekt erstellen
         Transaction newTransaction = new Transaction(
                 user.getUid(),
                 description,
@@ -218,7 +214,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 isRecurring
         );
 
-        // Anstatt db.collection(...).add(...) nutzen wir jetzt den Manager:
+        // 5. Speichern über Manager
         FirestoreManager.getInstance().saveTransaction(newTransaction, new FirestoreCallback<Void>() {
             @Override
             public void onCallback(Void result) {

@@ -27,7 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
+// *** Verwaltung und Erstellung von PDF-Berichten ***
 public class ReportsActivity extends AppCompatActivity {
     private Button btnGenerate, btnPrevMonth, btnNextMonth;
     private android.widget.TextView tvSelectedMonth;
@@ -42,9 +42,9 @@ public class ReportsActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         selectedDate = Calendar.getInstance();
 
-        initViews(); // UI initialisieren
+        initViews(); // Initialisierung der UI-Elemente
         setupBottomNavigation();
-        updateMonthDisplay();// Text (z.B. "Januar 2026") anzeigen
+        updateMonthDisplay();
     }
     private void initViews() {
         btnGenerate = findViewById(R.id.btn_generate_pdf);
@@ -66,14 +66,16 @@ public class ReportsActivity extends AppCompatActivity {
             updateMonthDisplay();
         });
     }
+    // Aktualisiert die Anzeige des gewählten Zeitraums
     private void updateMonthDisplay() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.GERMANY);
         tvSelectedMonth.setText(sdf.format(selectedDate.getTime()));
     }
+    // Hauptlogik: Daten laden -> Filtern -> PDF anstoßen
     private void loadDataAndCreatePdf() {
         if (mAuth.getCurrentUser() == null) return;
 
-        btnGenerate.setEnabled(false); // Button sperren
+        btnGenerate.setEnabled(false); // Button sperren (Doppelklicks verhindern)
         btnGenerate.setText("Lade Daten...");
 
         // 1. Startdatum des gewählten Monats setzen (1. Tag 00:00 Uhr)
@@ -84,7 +86,7 @@ public class ReportsActivity extends AppCompatActivity {
         startOfMonth.set(Calendar.SECOND, 0);
         startOfMonth.set(Calendar.MILLISECOND, 0);
 
-        //Laden über den Manager
+        // 2. Daten aus Firestore holen (ab Startdatum)
         FirestoreManager.getInstance().getTransactionsFromDate(startOfMonth.getTime(), new FirestoreCallback<List<Transaction>>() {
             @Override
             public void onCallback(List<Transaction> transactions) {
@@ -97,7 +99,7 @@ public class ReportsActivity extends AppCompatActivity {
                     resetButton();
                     return;
                 }
-                createPdf(filteredList);
+                createPdf(filteredList); // Wenn Daten da sind: PDF generieren
             }
 
             @Override
@@ -107,6 +109,7 @@ public class ReportsActivity extends AppCompatActivity {
             }
         });
     }
+    // Filtert die Liste lokal, um sicherzustellen, dass nur Daten des gewählten Monats enthalten sind
     private List<Transaction> filterTransactionsForMonth(List<Transaction> all, Calendar monthCal) {
         List<Transaction> result = new ArrayList<>();
         int targetMonth = monthCal.get(Calendar.MONTH);
@@ -116,7 +119,7 @@ public class ReportsActivity extends AppCompatActivity {
         for (Transaction t : all) {
             if (t.getTimestamp() != null) {
                 tCal.setTime(t.getTimestamp());
-                // Prüfen ob Monat und Jahr übereinstimmen
+                // Prüfen ob Monat UND Jahr übereinstimmen
                 if (tCal.get(Calendar.MONTH) == targetMonth && tCal.get(Calendar.YEAR) == targetYear) {
                     result.add(t);
                 }
@@ -128,17 +131,17 @@ public class ReportsActivity extends AppCompatActivity {
         btnGenerate.setEnabled(true);
         btnGenerate.setText("PDF Erstellen & Teilen");
     }
-
+    // Erstellt das physische PDF-Dokument mittels Canvas (Zeichnen).
     private void createPdf(List<Transaction> transactions) {
-        // Dokument erstellen (A4 Größe: 595 x 842 Pixel)
+        // Dokument und Seite definieren (A4 Format: 595x842 Punkte)
         PdfDocument document = new PdfDocument();
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
         PdfDocument.Page page = document.startPage(pageInfo);
-        // "Stift" vorbereiten
+        // Zeichenwerkzeuge vorbereiten
         android.graphics.Canvas canvas = page.getCanvas();
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
-        //Titel schreiben
+        // --- KOPFZEILE (Titel) ---
         paint.setTextSize(24);
         paint.setFakeBoldText(true);
         canvas.drawText("Monatsbericht", 50, 60, paint);
@@ -148,13 +151,13 @@ public class ReportsActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.GERMANY);
         String reportMonth = sdf.format(selectedDate.getTime());
         canvas.drawText("Zeitraum: " + reportMonth, 50, 85, paint);
-        // Linie ziehen
+        // Trennlinie ziehen
         paint.setColor(Color.LTGRAY);
         paint.setStrokeWidth(2);
         canvas.drawLine(50, 100, 545, 100, paint);
-        // ... (Fortsetzung)
 
-        // Liste zeichnen
+
+        // --- TABELLENINHALT ---
         int y = 140; // Start-Höhe für die erste Zeile
         paint.setColor(Color.BLACK);
         paint.setTextSize(12);
@@ -163,19 +166,18 @@ public class ReportsActivity extends AppCompatActivity {
         SimpleDateFormat dateFmt = new SimpleDateFormat("dd.MM.", Locale.GERMANY);
 
         for (Transaction t : transactions) {
-            // Datum (Links)
+            // Spalte 1: Datum - (Links)
             if (t.getTimestamp() != null) {
                 String date = dateFmt.format(t.getTimestamp());
                 canvas.drawText(date, 50, y, paint);
             }
 
-            // Titel (Mitte)
-            // Titel wird gekürzt, falls er zu lang ist
+            // Spalte 2: Titel (gekürzt bei Überlänge) - (Mitte)
             String title = t.getTitle();
             if (title.length() > 30) title = title.substring(0, 27) + "...";
             canvas.drawText(title, 110, y, paint);
 
-            // Betrag (Rechtsbündig simulieren)
+            // Spalte 3: Betrag (Färbung rot/grün) - (Rechts)
             String amountStr = String.format(Locale.GERMANY, "%.2f €", t.getAmount());
             if ("ausgabe".equals(t.getType())) {
                 paint.setColor(Color.RED);
@@ -190,10 +192,10 @@ public class ReportsActivity extends AppCompatActivity {
 
             // Farbe zurücksetzen für nächste Zeile
             paint.setColor(Color.BLACK);
-            y += 25; // Zeilenabstand
+            y += 25; // Zeilenabstand/Zeilenumbruch
         }
 
-        // Gesamtsumme Strich & Ergebnis
+        // --- FUSSZEILE (Gesamtsumme Strich & Ergebnis) ---
         y += 10;
         paint.setColor(Color.BLACK);
         canvas.drawLine(400, y, 545, y, paint); // Kleiner Strich über Summe
@@ -207,13 +209,14 @@ public class ReportsActivity extends AppCompatActivity {
 
         // Seite abschließen
         document.finishPage(page);
+        //Wir formatieren das Datum für den Dateinamen
+        SimpleDateFormat nameFormat = new SimpleDateFormat("MMMM_yyyy", Locale.GERMANY);
+        String monatName = nameFormat.format(selectedDate.getTime());
         // Datei speichern (im Cache-Ordner, damit wir keine Speicher-Rechte brauchen)
-        File file = new File(getCacheDir(), "Finanzbericht.pdf");
+        File file = new File(getCacheDir(), "Finanzbericht_" + monatName + ".pdf");
 
         try {
             document.writeTo(new FileOutputStream(file));
-
-            // Teilen-Intent starten
             sharePdf(file); // Hilfsmethode starten
 
         } catch (IOException e) {
@@ -232,11 +235,12 @@ public class ReportsActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("application/pdf");
         intent.putExtra(Intent.EXTRA_STREAM, uri);
+        // Temporäre Leserechte an die Empfänger-App vergeben
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         startActivity(Intent.createChooser(intent, "Bericht teilen via"));
     }
-
+    // Konfiguration der unteren Navigationsleiste
     private void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         // Hier ist der Reports-Tab aktiv

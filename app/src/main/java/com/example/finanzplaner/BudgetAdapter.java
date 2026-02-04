@@ -13,32 +13,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 import java.util.Locale;
-
+// Adapter-Klasse für die RecyclerView auf dem Home-Screen.
 public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder> {
     private List<Category> categoryList;
-    // Daten empfangen
+    // Konstruktor: Nimmt die Liste der Kategorien entgegen
     public BudgetAdapter(List<Category> categoryList) {
         this.categoryList = categoryList;
     }
-
+    //Erstellt neue Listen-Einträge (Views), wenn nicht genügend recycelbare Views vorhanden sind.
         @NonNull
         @Override
         public BudgetViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_budget, parent, false);
             return new BudgetViewHolder(view);
         }
-
+    //Die Kern-Logik: Verknüpft die Daten einer spezifischen Kategorie mit den Views.
         @Override
         public void onBindViewHolder(@NonNull BudgetViewHolder holder, int position) {
             Category cat = categoryList.get(position);
 
-            // Name setzen
+            // Grunddaten setzen (Name und Text-Details)
             holder.tvName.setText(cat.getName());
 
             double spent = cat.getCurrent();
             double limit = cat.getLimit();
 
-            // Einfacher Text für Details
+            // // Formatierung des Textes (z.B. "50.00 € ausgegeben von 100.00 €")
             String details = String.format(Locale.GERMANY, "%.2f € ausgegeben", spent);
 
             if (limit > 0) {
@@ -53,14 +53,15 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
             holder.tvPercent.setText("");
             holder.progressBar.setProgress(0);
 
-            // Prozentberechnung & Farben
+            // --- Logik für den Fortschrittsbalken und das Ampel-System ---
             if (limit > 0) {
+                // Prozentberechnung: (Ausgegeben / Limit) * 100
                 int percentage = (int) ((spent / limit) * 100);
 
-                // Balken setzen (Maximal 100)
+                // Balken füllen (Maximalwert ist 100)
                 holder.progressBar.setMax(100);
                 holder.progressBar.setProgress(Math.min(percentage, 100));
-                // --- Die Farb-Ampel ---
+                // Farb-Logik basierend auf dem Füllstand
                 if (percentage >= 100) {
                     // ROT: Limit voll
                     int redColor = Color.parseColor("#D74848");
@@ -81,19 +82,20 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
                     holder.progressBar.setProgressTintList(ColorStateList.valueOf(greenColor));
                 }
             } else {
-                    // Kein Limit -> Alles leer lassen
+                    // Fallback: Wenn kein Limit gesetzt ist, zeigen wir keinen Balken an
                     holder.tvPercent.setText("");
                     holder.progressBar.setProgress(0);
                 }
 
         }
-
+        // Gibt die Anzahl der Elemente in der Liste zurück (wichtig für die RecyclerView)
         @Override
         public int getItemCount() {
             return categoryList.size();
         }
 
-        // Die innere Klasse, die unsere Views aus dem XML hält
+        //Speichert Referenzen zu den UI-Elementen, damit 'findViewById' nicht
+        // jedes Mal neu aufgerufen werden muss (Performance-Optimierung beim Scrollen).
         public static class BudgetViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvPercent, tvDetails;
             ProgressBar progressBar;

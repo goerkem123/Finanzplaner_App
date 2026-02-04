@@ -7,7 +7,8 @@ import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//Verwaltet alle Datenbank-Zugriffe (Firestore).
+//Nutzt das Singleton-Pattern für zentralen Zugriff.
 public class FirestoreManager {
     // Es gibt NUR eine einzige Instanz (Singleton) → egal wie oft du FirestoreManager.getInstance() aufruft
     private static FirestoreManager instance;
@@ -29,6 +30,7 @@ public class FirestoreManager {
         }
         return instance;
     }
+    // Hilfsmethode: Prüft Login-Status und gibt User-ID zurück
     private String requireUserId(FirestoreCallback<?> callback) {
         if (mAuth.getCurrentUser() == null) {
             if (callback != null) callback.onFailure(new Exception("Nicht eingeloggt"));
@@ -64,14 +66,14 @@ public class FirestoreManager {
 
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .orderBy("timestamp", Query.Direction.DESCENDING) // Wichtig für Index
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     List<Transaction> list = new ArrayList<>();
                     for (DocumentSnapshot doc : snapshots) {
                         Transaction t = doc.toObject(Transaction.class);
                         if (t != null) {
-                            t.setId(doc.getId()); // WICHTIG: Dokument-ID setzen für Lösch-Funktion
+                            t.setId(doc.getId()); // Dokument-ID setzen für Lösch-Funktion
                             list.add(t);
                         }
                     }

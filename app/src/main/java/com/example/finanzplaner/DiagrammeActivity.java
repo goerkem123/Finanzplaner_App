@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// *** Activity zur Visualisierung der Finanzen ***
 public class DiagrammeActivity extends AppCompatActivity {
     private PieChart pieChart;
     private TabLayout tabLayout;
@@ -43,11 +44,11 @@ public class DiagrammeActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottomNavigationView);
         
         setupBottomNavigation();
-        setupPieChartStyle();
-        setupTabs();
+        setupPieChartStyle(); // Grundlegendes Design des Diagramms setzen
+        setupTabs(); // Logik für den Wechsel zwischen Einnahmen/Ausgaben
         loadChartData("ausgabe"); // Standard-Start
     }
-
+    // Konfiguration der Tabs
     private void setupTabs() {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -68,6 +69,7 @@ public class DiagrammeActivity extends AppCompatActivity {
             public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
+    // Hauptlogik der Datenverarbeitung: Lädt, Filtert und Gruppiert Transaktonen nach Kategorie
     private void loadChartData(String type) {
         FirestoreManager.getInstance().getTransactions(new FirestoreCallback<List<Transaction>>() {
             @Override
@@ -99,38 +101,42 @@ public class DiagrammeActivity extends AppCompatActivity {
             }
         });
     }
-
+    // Wandelt die gruppierten Daten (Map) in das Format der Chart-Library um (PieEntry)
+    // und zeichnet das Diagramm neu.
     private void updateChart(Map<String, Double> categorySums) {
         List<PieEntry> entries = new ArrayList<>();
+
+        // Map in PieEntry-Liste umwandeln
         for (Map.Entry<String, Double> entry : categorySums.entrySet()) {
             entries.add(new PieEntry(entry.getValue().floatValue(), entry.getKey()));
         }
-
+        // Fallback für leere Daten
         if (entries.isEmpty()) {
             pieChart.clear();
             pieChart.setCenterText("Keine Daten");
             pieChart.invalidate();
             return;
         }
-
+        // Dataset konfigurieren (Farben, Abstände, Schriftgröße)
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(getCustomColors());
         dataSet.setSliceSpace(3f);
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setValueTextSize(12f);
 
+        // Daten zuweisen und Formatierung auf Prozent stellen
         PieData data = new PieData(dataSet);
         data.setValueFormatter(new PercentFormatter(pieChart));
 
         pieChart.setData(data);
-        pieChart.invalidate();
-        pieChart.animateY(1000);
+        pieChart.invalidate(); // Refresh erzwingen
+        pieChart.animateY(1000);// Animation beim Aufbau (1sek = 1000ms)
 
     }
 
-    // Design des Diagramms einstellen
+    // Setzt visuelle Eigenschaften des Diagramms (Donut-Form, Text in der Mitte, Legende).
     private void setupPieChartStyle() {
-        pieChart.setUsePercentValues(true);
+        pieChart.setUsePercentValues(true); // Werte automatisch in % umrechnen
         pieChart.getDescription().setEnabled(false);
         pieChart.setExtraOffsets(5, 10, 5, 5);
 
@@ -146,7 +152,7 @@ public class DiagrammeActivity extends AppCompatActivity {
         pieChart.setCenterTextSize(18f);
         pieChart.setCenterTextColor(Color.WHITE);
 
-        // Legende (Erklärung der Farben)
+        // Konfiguration der Legende
         Legend l = pieChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
@@ -155,7 +161,7 @@ public class DiagrammeActivity extends AppCompatActivity {
         l.setEnabled(true);
         l.setTextColor(Color.WHITE);
     }
-    // Unsere eigene Farbpalette
+    // Definiert eine eigene Farbpalette für die Kategorien
     private ArrayList<Integer> getCustomColors() {
         ArrayList<Integer> colors = new ArrayList<>();
         colors.add(Color.parseColor("#E57373")); // Rot
@@ -167,7 +173,7 @@ public class DiagrammeActivity extends AppCompatActivity {
         colors.add(Color.parseColor("#FFF176")); // Gelb
         return colors;
     }
-
+    // Konfiguration der unteren Navigationsleiste
     private void setupBottomNavigation() {
         bottomNav.setSelectedItemId(R.id.nav_diagramme);
         bottomNav.setOnItemSelectedListener(item -> {

@@ -24,7 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Locale;
-
+// *** Das Haupt-Dashboard der App ***
+// Zeigt die Finanzübersicht (Saldo, Einnahmen, Ausgaben)
 public class HomeActivity extends AppCompatActivity {
 
     // UI-Elemente
@@ -47,16 +48,14 @@ public class HomeActivity extends AppCompatActivity {
         // Firebase initialisieren
         mAuth = FirebaseAuth.getInstance();
 
-        // Views verbinden
+        // Verknüpft die Java-Variablen mit den XML-Elementen (Views verbinden)
         btnLogout = findViewById(R.id.btn_logout);
         btnCategories = findViewById(R.id.btn_categories);
         fabAdd = findViewById(R.id.fab_add_transaction);
-
-        // DIE IDS AUS DEM XML-LAYOUT
-        tvBalance = findViewById(R.id.tv_balance);        // Gesamtsaldo
-        tvIncome = findViewById(R.id.tv_income_amount);   // Einnahmen
-        tvExpense = findViewById(R.id.tv_expense_amount); // Ausgaben
-        tvOverviewTitle = findViewById(R.id.tv_overview_title); //Tittel
+        tvBalance = findViewById(R.id.tv_balance);
+        tvIncome = findViewById(R.id.tv_income_amount);
+        tvExpense = findViewById(R.id.tv_expense_amount);
+        tvOverviewTitle = findViewById(R.id.tv_overview_title);
 
         // RecyclerView einrichten
         recyclerViewBudgets = findViewById(R.id.recycler_view_budgets);
@@ -101,7 +100,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
         loadFinancialData();
 
-        // Der saubere Aufruf über den Manager:
+        // Prüfung auf fällige Daueraufträge (Automatisierung)
         FirestoreManager.getInstance().checkRecurringTransactions(this, new FirestoreCallback<Integer>() {
             @Override
             public void onCallback(Integer count) {
@@ -148,6 +147,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onFailure(Exception e) {}
         });
     }
+    // Lädt den Benutzernamen für die persönliche Begrüßung ("Willkommen, Alex!")
     private void loadUserName() {
         FirestoreManager.getInstance().getUserName(new FirestoreCallback<String>() {
             @Override
@@ -164,7 +164,7 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    // Hauptlogik: Daten aus Firestore laden und berechnen
+    // Hauptlogik: Daten aus Firestore laden und berechnen (erst Kategorien, dann Transaktionen)
     private void loadFinancialData() {
         if (mAuth.getCurrentUser() == null) return;
         tvBalance.setText("Lädt...");
@@ -187,7 +187,7 @@ public class HomeActivity extends AppCompatActivity {
         });
 
     }
-
+    // Transaktionen laden
     private void loadTransactionsAndCalculate(List<Category> categories) {
         FirestoreManager.getInstance().getTransactions(new FirestoreCallback<List<Transaction>>() {
             @Override
@@ -200,7 +200,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
-
+    // Berechnet Summen und ordnet Ausgaben den Kategorien zu
     private void calculateAndShowData(List<Category> categories, List<Transaction> transactions) {
         double totalIncome = 0;
         double totalExpense = 0;
@@ -254,7 +254,6 @@ public class HomeActivity extends AppCompatActivity {
     // Hilfsmethode, um die berechneten Zahlen schön formatiert anzuzeigen
     private void updateUI(double balance, double income, double expense) {
         // Zahlen als Währung formatieren (z.B. "1.234,56 €")
-        // Verwendet Locale.GERMANY für das Komma statt Punkt und das €-Zeichen
         String balanceStr = String.format(Locale.GERMANY, "%.2f €", balance);
         String incomeStr = String.format(Locale.GERMANY, "%.2f €", income);
         String expenseStr = String.format(Locale.GERMANY, "%.2f €", expense);
@@ -265,7 +264,6 @@ public class HomeActivity extends AppCompatActivity {
         tvExpense.setText(expenseStr);
 
         // Farbe des Kontostands anpassen (Grün bei Plus, Rot bei Minus)
-        // Ich habe die Farben aus dem XML deines Partners genommen.
         if (balance >= 0) {
             // Ein schönes Grün für Plus (#79A07A)
             tvBalance.setTextColor(Color.parseColor("#79A07A"));
@@ -275,7 +273,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    // Deine alte Navigations-Logik (ausgelagert für Übersichtlichkeit)
+    // Konfiguration der unteren Navigationsleiste
     private void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         bottomNav.setSelectedItemId(R.id.nav_home);
